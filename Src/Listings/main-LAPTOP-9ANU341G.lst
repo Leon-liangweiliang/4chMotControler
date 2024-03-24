@@ -1,0 +1,909 @@
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src) DEBUG PRI
+                    -NT(.\Listings\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    Project/main.c 
+   4            * @author  MCD Application Team
+   5            * @version V2.2.0
+   6            * @date    30-September-2014
+   7            * @brief   Main program body
+   8           */
+   9          /* Includes ------------------------------------------------------------------*/
+  10          #include "main.h"
+  11          #include "uarttask.h"
+  12          #include "motor.h"
+  13          #include "CompressSensor.h"
+  14          #include "SaveConfigFile.h"
+  15          #include "PWM.h"
+  16          
+  17          /* Private defines -----------------------------------------------------------*/
+  18          #define TPDELAYTIMEOUTN  30
+  19          
+  20          /* Private function prototypes -----------------------------------------------*/
+  21          /* Private functions ---------------------------------------------------------*/
+  22          
+  23          extern uint8_t  RxBuffer1[RxBufferSize1];
+  24          extern uint8_t RxCounter1,ReadCounter1;
+  25          extern uint8_t RxByteSize;
+  26          volatile UARTST_ENUM RecStatus=0;
+  27          UARTST_PKG  uart1rcpkg;
+  28          
+  29          
+  30          uint8_t LCD_DISPiD=0;
+  31          uint8_t _isOnOff=0,OnShare=0,NeedStop=0,NeedUpdateTime=0,NeedUpdateBeep=0;
+  32          
+  33          uint8_t PauseRFprocess=0;
+  34          
+  35          u8 RFPowerOutputCounter=0;
+  36          u8 Touchdetect=0,RunningPowerSet=0;
+  37          
+  38          u16 RFPowerCounter=0,PauseTime=0;
+  39          u8 PauseTimes=0,RFoutput=0;
+  40          
+  41          volatile uint8_t UartPkgTimeoutCounter=0;
+  42          u8 LedctrlOnoff=0,Led1PowerCounter=0;
+  43          u8 mSecond=0,Second=0,Minute=15;
+  44          u8 BeepCounter=0;
+  45          u8 SetMinute=15;  
+  46          u8 RFPower=0;
+  47          u8 PuleTimes=1;
+  48          u8 PuleTime=10;
+  49          u8 RFmodle=0;
+  50          
+  51          u8 biooutput=0;
+  52          u8 buttonstatus=0;
+  53          
+  54          u8 ADCValue=0;
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 2   
+
+  55          u8 ADCMaxValue=0;
+  56          
+  57          //const u8 ADCCmpValue[ ]={42,80,82,84,88,90,92,94,96,98,100,102,104,106,108,110,112,114,116,118,120,180};
+  58          const u8 ADCCmpValue[]={59,64,70,75,80,85,90,95,100,105,110,115,120,125,130,135,140,145,150,155,160,165};
+  59          /*
+  60          #define ADCCMPValueLow 700
+  61          #define ADCCMPValueMiddle1  1000
+  62          #define ADCCMPValueMiddle2  1300
+  63          #define ADCCMPValueMiddle3  1600
+  64          #define ADCCMPValueMiddle4  1900
+  65          #define ADCCMPValueHigh  2048
+  66          */
+  67          
+  68          /*********************************************
+  69          函数功能：系统外部时钟配置  22.1184
+  70          输入参数  
+  71          输出参数：无
+  72          备    注：
+  73          *********************************************/   
+  74          void CLOCK_Config(void)
+  75          {
+  76   1        //CLK_DeInit();
+  77   1        //CLK_HSIPrescalerConfig(CLK_PRESCALER_HSIDIV1);
+  78   1          P_SW2 = 0x80;
+  79   1          XOSCCR = 0xc0;                              //启动外部晶振
+  80   1          while (!(XOSCCR & 1));                      //等待时钟稳定
+  81   1          CLKDIV = 0x00;                               //时钟不分频
+  82   1          CKSEL = 0x01;                               //选择外部晶振
+  83   1          P_SW2 = 0x00;
+  84   1      }
+  85          
+  86          void delay_us(uint16_t dt)
+  87          {
+  88   1        dt = dt<<1;
+  89   1        while (--dt);
+  90   1      }
+  91            
+  92          void Delay5ms()   //@22.1184MHz
+  93          {
+  94   1        unsigned char i, j;
+  95   1      
+  96   1        _nop_();
+  97   1        _nop_();
+  98   1        i = 144;
+  99   1        j = 157;
+ 100   1        do
+ 101   1        {
+ 102   2          while (--j);
+ 103   2        } while (--i);
+ 104   1      }
+ 105          
+ 106          
+ 107          void delay_ms(uint16_t dt)
+ 108          {
+ 109   1       while (dt>0)
+ 110   1        {
+ 111   2        delay_us(320);
+ 112   2        dt--;
+ 113   2        }
+ 114   1      }
+ 115          
+ 116          void Gpio_Init(void)
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 3   
+
+ 117          {
+ 118   1        P67=1; //footswitch
+ 119   1        P66=0;//SPEAKER
+ 120   1        P6M0=0X40;
+ 121   1        P6M1=0;
+ 122   1      
+ 123   1        P50=1; //输出继电器1
+ 124   1        P51=1; //输出继电器2
+ 125   1        P52=0; //led
+ 126   1        P5M0=0X07;
+ 127   1        P5M1=0;
+ 128   1      
+ 129   1        P70=1;
+ 130   1        P71=1;
+ 131   1        
+ 132   1        P7M0=0X0F;
+ 133   1        P7M1=0;
+ 134   1        
+ 135   1        P4M0=0X06;
+ 136   1        P4M1=0;
+ 137   1        
+ 138   1        P35=1;  //button
+ 139   1        P33=0;
+ 140   1        P3M0=0X48;
+ 141   1        P3M1=0x00;
+ 142   1      
+ 143   1        P21=1;P22=1;
+ 144   1        P2M0=0X0E;
+ 145   1        P2M1=0;
+ 146   1      
+ 147   1        P10=1;P11=1;
+ 148   1        P1M0=0X02;
+ 149   1        P1M1=0X0C;  //设置P1.2 P1.3为ADC口
+ 150   1      
+ 151   1        P0M0=0;
+ 152   1        P0M1=0X01;
+ 153   1      }
+ 154          
+ 155          
+ 156          
+ 157          void Beep(void)
+ 158          {
+ 159   1        P52=1;  //LED
+ 160   1        P66=1;  //SPK
+ 161   1        delay_ms(100);
+ 162   1        P66=0;
+ 163   1        P52=0;
+ 164   1      }
+ 165          
+ 166          void SlotCtrl(uint8_t ct)
+ 167          {
+ 168   1        if (ct==0)
+ 169   1          {
+ 170   2          P50=1;
+ 171   2          P51=1;
+ 172   2          }
+ 173   1        else if (ct==1) 
+ 174   1          {
+ 175   2          P50=1;
+ 176   2          P51=0;
+ 177   2          }
+ 178   1        else if (ct==2)
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 4   
+
+ 179   1          {
+ 180   2          P51=1;
+ 181   2          P50=0;
+ 182   2          }
+ 183   1      }
+ 184          
+ 185          void Led2Ctrl(u8 ct)
+ 186          {
+ 187   1        if (ct==0)
+ 188   1          P23=1;
+ 189   1        else
+ 190   1          P23=0;
+ 191   1      }
+ 192          
+ 193          void Led1Ctrl(u8 ct)
+ 194          {
+ 195   1        if (ct==0)
+ 196   1          {
+ 197   2          LedctrlOnoff=0;
+ 198   2          P73=1;
+ 199   2          }
+ 200   1        else
+ 201   1          {
+ 202   2          LedctrlOnoff=1;
+ 203   2          //P73=0;
+ 204   2          }
+ 205   1      }
+ 206          
+ 207          void ADCInit(void)
+ 208          {
+ 209   1          ADCCFG = 0x0f;                //设置ADC时钟为系统时钟/2/16/16
+ 210   1          ADC_CONTR = 0x83;               //使能ADC模块
+ 211   1          EADC = 1;                   //使能ADC中断
+ 212   1         // ADC_CONTR |= 0x40;              //启动AD转换
+ 213   1      
+ 214   1      
+ 215   1      }
+ 216          
+ 217          void Timer0Init(void)   //53微秒@22.1184MHz
+ 218          {
+ 219   1        AUXR |= 0x80;   //定时器时钟1T模式
+ 220   1        TMOD &= 0xF0;   //设置定时器模式
+ 221   1        TL0 = 0x61;   //设置定时初值
+ 222   1        TH0 = 0xFB;   //设置定时初值
+ 223   1        TF0 = 0;    //清除TF0标志
+ 224   1        ET0 = 1;         //使能定时器中断
+ 225   1        TR0 = 0;    //定时器0开始计时
+ 226   1      }
+ 227          
+ 228          void Timer1Init(void)   //10毫秒@22.1184MHz
+ 229          {
+ 230   1        AUXR &= 0xBF;   //定时器时钟12T模式
+ 231   1        TMOD &= 0x0F;   //设置定时器模式
+ 232   1        TL1 = 0x00;   //设置定时初值
+ 233   1        TH1 = 0xB8;   //设置定时初值
+ 234   1        TF1 = 0;    //清除TF1标志
+ 235   1        ET1 = 1;         //使能定时器中断
+ 236   1        TR1 = 0;    //定时器1开始计时
+ 237   1      }
+ 238          
+ 239          void Timer3Init(void)   //100微秒@22.1184MHz
+ 240          {
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 5   
+
+ 241   1        T4T3M |= 0x02;    //定时器时钟1T模式
+ 242   1        T3L = 0x5C;   //设置定时初值
+ 243   1        T3H = 0xF7;   //设置定时初值
+ 244   1      
+ 245   1        IE2 |= ET3;      //使能定时器中断
+ 246   1        
+ 247   1        T4T3M &= 0xf7;    //定时器3开始计时
+ 248   1        //T4T3M |= 0x08;    //定时器3开始计时
+ 249   1      }
+ 250          
+ 251          /*
+ 252          void ConfigBIOPower(void)
+ 253          {
+ 254             u16 value;
+ 255             value=RFPower;
+ 256             value=0xffff-(value<<8);
+ 257            T3L = value;    //设置定时初值
+ 258            T3H = value>>8;   //设置定时初值
+ 259            if (biooutput) 
+ 260            {
+ 261              P70=0;
+ 262              biooutput=0;
+ 263            }   
+ 264            else  
+ 265            {
+ 266              P71=0;
+ 267              biooutput=1;
+ 268            }
+ 269            T4T3M |= 0x08;    //定时器3开始计时
+ 270          }
+ 271          */
+ 272          
+ 273          #define led1PwmPower 2
+ 274          void OutputLed1Pwm(void)
+ 275          {
+ 276   1        
+ 277   1        if (Led1PowerCounter<10) 
+ 278   1          {Led1PowerCounter++; }
+ 279   1        else 
+ 280   1          {
+ 281   2          Led1PowerCounter=0;
+ 282   2          if (LedctrlOnoff) P73=0;
+ 283   2          }
+ 284   1        
+ 285   1        if (Led1PowerCounter>=led1PwmPower) P73=1;
+ 286   1      }
+ 287          
+ 288          
+ 289          void Begin(void)
+ 290          {
+ 291   1        _isOnOff=1;
+ 292   1        SetAddressValue(0x1011,1);
+ 293   1        SetAddressValue(0x1012,0);
+ 294   1        SetAddressValue(0x1014,0);
+ 295   1        TR1 = 1;    //定时器1开始计时
+ 296   1        ADC_CONTR |= 0x40;             //启动AD转换
+ 297   1        if (RFmodle==1)
+ 298   1        {
+ 299   2          TR0 = 1;    //定时器0开始计时
+ 300   2        }
+ 301   1        else 
+ 302   1          T4T3M |= 0x08;    //定时器3开始计时
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 6   
+
+ 303   1      }
+ 304          
+ 305          void Pause(void)
+ 306          {
+ 307   1        TR0 = 0;    //定时器0开始计时
+ 308   1        TR1 = 0;    //定时器1开始计时
+ 309   1        T4T3M &= 0xf7;    //定时器3开始计
+ 310   1        P70=1;
+ 311   1        P71=1;
+ 312   1        ADC_CONTR = 0x83;
+ 313   1        StopPwm();
+ 314   1        _isOnOff=2;
+ 315   1        SetAddressValue(0x1011,0);
+ 316   1        SetAddressValue(0x1012,1);
+ 317   1        SetAddressValue(0x1014,0);
+ 318   1        Led2Ctrl(0);
+ 319   1        Led1Ctrl(0);
+ 320   1        
+ 321   1      }
+ 322          
+ 323          void Stop(void)
+ 324          {
+ 325   1        T4T3M &= 0xf7;    //定时器3开始计时
+ 326   1        TR0 = 0;    //定时器0开始计时
+ 327   1        TR1 = 0;    //定时器1开始计时
+ 328   1        P70=1;
+ 329   1        P71=1;
+ 330   1        ADC_CONTR = 0x83;
+ 331   1        StopPwm();
+ 332   1        _isOnOff=0;
+ 333   1        PauseRFprocess=0;
+ 334   1        SetAddressValue(0x1011,0);
+ 335   1        SetAddressValue(0x1012,0);
+ 336   1        SetAddressValue(0x1014,1);
+ 337   1        Minute=SetMinute;
+ 338   1        Second=0;
+ 339   1        UpdateLcdTime(Minute, Second);
+ 340   1        RFPower=0;
+ 341   1        SendPowerLevel1(RFPower);
+ 342   1        SendPowerLevel2(RFPower);
+ 343   1        Led2Ctrl(0);
+ 344   1        Led1Ctrl(0);
+ 345   1        
+ 346   1      }
+ 347          
+ 348          //time1 定时超时判断
+ 349          void Time1OutDelaySub(void)
+ 350          {
+ 351   1        if (RecStatus!=REC_HEAD1)
+ 352   1          {
+ 353   2          UartPkgTimeoutCounter++;
+ 354   2          if (UartPkgTimeoutCounter>100)
+ 355   2            {
+ 356   3            UartPkgTimeoutCounter=0;
+ 357   3            RecStatus=REC_HEAD1;
+ 358   3            }
+ 359   2          }
+ 360   1      
+ 361   1        if (_isOnOff)
+ 362   1          {
+ 363   2          BeepCounter++;
+ 364   2          if (BeepCounter>=45)
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 7   
+
+ 365   2          {
+ 366   3          BeepCounter=0;
+ 367   3          if (PauseRFprocess>0 && Touchdetect!=0) NeedUpdateBeep=1;
+ 368   3          }
+ 369   2          
+ 370   2          mSecond++;
+ 371   2          
+ 372   2          if (mSecond>100)
+ 373   2            {
+ 374   3            mSecond=0;
+ 375   3      
+ 376   3            //if (OnShare) OnShare=0; else OnShare=1;
+ 377   3            //if (PauseRFprocess>0 && Touchdetect) NeedUpdateBeep=1;
+ 378   3            NeedUpdateTime=1;
+ 379   3            if(Second==0)
+ 380   3              {
+ 381   4              Second=59;
+ 382   4              Minute--;
+ 383   4              if (Minute==0)
+ 384   4                {
+ 385   5                NeedStop=1;
+ 386   5                Second=0;
+ 387   5                }
+ 388   4              }
+ 389   3            else 
+ 390   3              Second--;
+ 391   3            }
+ 392   2      
+ 393   2          
+ 394   2          if (RunningPowerSet)  //running power lable
+ 395   2            {
+ 396   3            if (Touchdetect==0)
+ 397   3              {
+ 398   4              RFPowerOutputCounter++;
+ 399   4              if (RFPowerOutputCounter>50)   //0.5s
+ 400   4                {
+ 401   5                RFPowerOutputCounter=0;
+ 402   5                RunningPowerSet=0;
+ 403   5                }
+ 404   4              }
+ 405   3            else 
+ 406   3              {
+ 407   4              RFPowerOutputCounter=0;
+ 408   4              }
+ 409   3            }
+ 410   2          else 
+ 411   2            {
+ 412   3            if (Touchdetect==1)
+ 413   3              {
+ 414   4              RFPowerOutputCounter++;
+ 415   4              if (RFPowerOutputCounter>50)   //0.5s
+ 416   4                {
+ 417   5                RFPowerOutputCounter=0;
+ 418   5                RunningPowerSet=1;
+ 419   5                }
+ 420   4              }
+ 421   3            else 
+ 422   3              {
+ 423   4              RFPowerOutputCounter=0;
+ 424   4              } 
+ 425   3            }
+ 426   2          
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 8   
+
+ 427   2          if (PauseRFprocess==1)
+ 428   2            {
+ 429   3            if (PauseTimes==0 && Touchdetect) 
+ 430   3              {
+ 431   4              //Touchdetect=1;
+ 432   4              Led1Ctrl(1);
+ 433   4              }
+ 434   3      
+ 435   3            RFPowerCounter++;
+ 436   3            if (RFPowerCounter>=PauseTime)
+ 437   3              {
+ 438   4              RFPowerCounter=0;
+ 439   4              if (Touchdetect)  //检测到触发
+ 440   4                {
+ 441   5                if (RFoutput)  //pwm 输出时间到
+ 442   5                  {
+ 443   6                  PauseTimes++;
+ 444   6                  if (PauseTimes>PuleTimes) //次数打完停止
+ 445   6                    {
+ 446   7                    PauseTimes=0;
+ 447   7                    TR0=0;  //pwm off
+ 448   7                    Led1Ctrl(0);
+ 449   7                    PauseRFprocess=0;
+ 450   7                    ADCMaxValue=0;
+ 451   7                    }
+ 452   6                  else
+ 453   6                    {
+ 454   7                    TR0=0;  //pwm off
+ 455   7                    RFoutput=0;
+ 456   7                    PauseTime=50; //间隔停止500ms
+ 457   7                    }
+ 458   6                  }
+ 459   5                else    //间隔停止时间到
+ 460   5                  {
+ 461   6                    TR0=1;  //pwm on
+ 462   6                    RFoutput=1;
+ 463   6                    PauseTime=PuleTime*10;
+ 464   6                  }
+ 465   5                }
+ 466   4              else    //无触发停止
+ 467   4                {
+ 468   5                RFPowerCounter=0;
+ 469   5                TR0=0;  //pwm off
+ 470   5                Led1Ctrl(0);
+ 471   5                PauseRFprocess=0;
+ 472   5                ADCMaxValue=0;
+ 473   5                }
+ 474   4                
+ 475   4              }
+ 476   3            }
+ 477   2          OutputLed1Pwm();
+ 478   2          //ConfigBIOPower();
+ 479   2          }
+ 480   1      }
+ 481          
+ 482          void DoRs232Cmd(void)
+ 483          {
+ 484   1        u8 tempv=0;
+ 485   1        u16 cmdaddcode;
+ 486   1      
+ 487   1      
+ 488   1        cmdaddcode=uart1rcpkg.Uart1RunBuf[0];
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 9   
+
+ 489   1        cmdaddcode=cmdaddcode<<8;
+ 490   1        cmdaddcode|=uart1rcpkg.Uart1RunBuf[1];
+ 491   1        if (cmdaddcode==0x1009)   //star
+ 492   1          {
+ 493   2            
+ 494   2          //  Beep();
+ 495   2            if (_isOnOff==0)
+ 496   2              {
+ 497   3              RFPower=1;
+ 498   3              if (RFmodle==0 ) SendPowerLevel1(RFPower);
+ 499   3              else SendPowerLevel2(RFPower);
+ 500   3              }
+ 501   2            Begin(); 
+ 502   2          }
+ 503   1        else if (cmdaddcode==0x100a)  //pause
+ 504   1          {
+ 505   2            if(_isOnOff==1)
+ 506   2              {
+ 507   3          //    Beep();
+ 508   3              Pause();
+ 509   3              }
+ 510   2          }
+ 511   1        else if (cmdaddcode==0x100b)  //stop
+ 512   1          {
+ 513   2          //  Beep();
+ 514   2            Stop();
+ 515   2          }
+ 516   1        else if (cmdaddcode==0x1001)  //power ++
+ 517   1          {
+ 518   2            if (_isOnOff==1)
+ 519   2            {
+ 520   3          //    Beep();
+ 521   3            if(RFPower<20) RFPower++;
+ 522   3            if (RFmodle==0 ) SendPowerLevel1(RFPower); else SendPowerLevel2(RFPower);
+ 523   3            }
+ 524   2          } 
+ 525   1        else if (cmdaddcode==0x1002)  //power --
+ 526   1          {
+ 527   2          if (_isOnOff==1)
+ 528   2            {
+ 529   3          //    Beep();
+ 530   3            if(RFPower>1) RFPower--;
+ 531   3            if (RFmodle==0 ) SendPowerLevel1(RFPower); else SendPowerLevel2(RFPower);
+ 532   3            }
+ 533   2          } 
+ 534   1        else if (cmdaddcode==0x1003)  //time++
+ 535   1          {
+ 536   2          if (_isOnOff==0)
+ 537   2            {
+ 538   3          //  Beep();
+ 539   3            if (SetMinute<60) SetMinute+=5;
+ 540   3            SetMinute=SetMinute/5*5;
+ 541   3            Minute=SetMinute;
+ 542   3            Second=0;
+ 543   3            UpdateLcdSetTime(SetMinute);
+ 544   3            UpdateLcdTime(Minute, Second);
+ 545   3            }
+ 546   2          } 
+ 547   1        else if (cmdaddcode==0x1004)  //time--
+ 548   1          {
+ 549   2          if (_isOnOff==0)
+ 550   2            {
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 10  
+
+ 551   3          //  Beep();
+ 552   3            if (SetMinute>5) SetMinute-=5;
+ 553   3            SetMinute=SetMinute/5*5;
+ 554   3            Minute=SetMinute;
+ 555   3            Second=0;
+ 556   3            UpdateLcdSetTime(SetMinute);
+ 557   3            UpdateLcdTime(Minute, Second);
+ 558   3            }
+ 559   2          }
+ 560   1        else if (cmdaddcode==0x1005)  //pulse time++
+ 561   1          {
+ 562   2          //  Beep();
+ 563   2          if (PuleTime<50) PuleTime++;
+ 564   2          SetAddressValue(0x1039,PuleTime);
+ 565   2          }
+ 566   1        else if (cmdaddcode==0x1006)  //pulse time--
+ 567   1          {
+ 568   2          //  Beep();
+ 569   2          if (PuleTime>1) PuleTime--;
+ 570   2          SetAddressValue(0x1039,PuleTime);
+ 571   2          }
+ 572   1        else if (cmdaddcode==0x1007)  //pulse times++
+ 573   1          {
+ 574   2          //  Beep();
+ 575   2          if (PuleTimes<10) PuleTimes++;
+ 576   2          SetAddressValue(0x1030,PuleTimes);
+ 577   2          }
+ 578   1        else if (cmdaddcode==0x1008)  //pulse times--
+ 579   1          {
+ 580   2          //  Beep();
+ 581   2          if (PuleTimes>1) PuleTimes--;
+ 582   2          SetAddressValue(0x1030,PuleTimes);
+ 583   2          }
+ 584   1        
+ 585   1        else if (cmdaddcode==0x100c)  //RF
+ 586   1          {
+ 587   2             if (_isOnOff==0)
+ 588   2             {
+ 589   3          //     Beep();
+ 590   3              if (RFmodle==0 )
+ 591   3              {
+ 592   4                LCD_DISPiD=2;
+ 593   4                ChangeDispId(LCD_DISPiD);
+ 594   4                RFmodle=1;
+ 595   4                SlotCtrl(2);
+ 596   4              }
+ 597   3              
+ 598   3                
+ 599   3            }
+ 600   2            else if (RFmodle==1)
+ 601   2            {
+ 602   3          //    Beep();
+ 603   3            }
+ 604   2            
+ 605   2          }
+ 606   1        else if (cmdaddcode==0x100d)  //Pause RF
+ 607   1          {
+ 608   2          if (_isOnOff==0)
+ 609   2            {
+ 610   3          //    Beep();
+ 611   3              if (RFmodle==1)
+ 612   3              {
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 11  
+
+ 613   4              LCD_DISPiD=1;
+ 614   4              ChangeDispId(LCD_DISPiD);
+ 615   4              RFmodle=0;
+ 616   4              SlotCtrl(1);
+ 617   4              }
+ 618   3            }
+ 619   2            else if (RFmodle==0)
+ 620   2            {
+ 621   3          //    Beep();
+ 622   3            }
+ 623   2            
+ 624   2          }
+ 625   1          
+ 626   1      }
+ 627          
+ 628          
+ 629          u8 DoUartPkg(void)
+ 630          {
+ 631   1        u8 temp;
+ 632   1        
+ 633   1        if (ReadCounter1==RxCounter1) return 0;
+ 634   1      
+ 635   1        temp=RxBuffer1[ReadCounter1];
+ 636   1        if (ReadCounter1<(RxBufferSize1-1)) ReadCounter1++; else ReadCounter1=0;
+ 637   1        if(RxByteSize>0)   RxByteSize--;
+ 638   1        switch (RecStatus)
+ 639   1        {
+ 640   2          case REC_HEAD1:
+ 641   2            if (temp==0X5A) RecStatus=REC_HEAD2;
+ 642   2          break;
+ 643   2          case REC_HEAD2:
+ 644   2            if (temp==0XA5) RecStatus=REC_RKLEN;
+ 645   2            else RecStatus=REC_HEAD1;
+ 646   2          break;
+ 647   2          case REC_RKLEN:
+ 648   2          if (temp>24|| temp<1) 
+ 649   2              RecStatus=REC_HEAD1;
+ 650   2            else 
+ 651   2              {
+ 652   3              uart1rcpkg.pklen=(uint8_t)(temp-1);
+ 653   3              RecStatus=REC_CMD;
+ 654   3              }
+ 655   2          break;
+ 656   2          case REC_CMD:
+ 657   2            if (temp!=0x81 && temp!=0x83)
+ 658   2              RecStatus=REC_HEAD1;
+ 659   2            else 
+ 660   2              {
+ 661   3              uart1rcpkg.cmd=temp;
+ 662   3              uart1rcpkg.bufwpoint=0;
+ 663   3              RecStatus=REC_DATA;
+ 664   3              }
+ 665   2            
+ 666   2          break;
+ 667   2          case REC_DATA:
+ 668   2            uart1rcpkg.Uart1RunBuf[uart1rcpkg.bufwpoint]=temp;
+ 669   2            uart1rcpkg.bufwpoint++;
+ 670   2            if (uart1rcpkg.bufwpoint>=uart1rcpkg.pklen)
+ 671   2              {
+ 672   3                DoRs232Cmd();
+ 673   3                RecStatus=REC_HEAD1;
+ 674   3                return 1;
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 12  
+
+ 675   3              }
+ 676   2          break;
+ 677   2          
+ 678   2        }
+ 679   1        return 2;
+ 680   1      }
+ 681          
+ 682          void HandleLCD(void)
+ 683          {
+ 684   1        if (NeedStop)
+ 685   1          {
+ 686   2          NeedStop=0;
+ 687   2            Stop();
+ 688   2          Beep();
+ 689   2          delay_ms(500);
+ 690   2          Beep();
+ 691   2          delay_ms(500);
+ 692   2          Beep();
+ 693   2          }
+ 694   1      
+ 695   1        if (NeedUpdateTime)
+ 696   1          {
+ 697   2          NeedUpdateTime=0;
+ 698   2          UpdateLcdTime(Minute,Second);
+ 699   2          }
+ 700   1      }
+ 701          
+ 702          const u8 str1[]="DATE:";    
+ 703          const u8 str2[]="Runtime:";    
+ 704          
+ 705          void InitLcdDisplay()
+ 706          {
+ 707   1      
+ 708   1        ChangeDispId(0);
+ 709   1        UpdateLcdSetTime(SetMinute);
+ 710   1        UpdateLcdTime(Minute,Second);
+ 711   1        SetAddressValue(0x1030,PuleTimes);
+ 712   1        SetAddressValue(0x1039,PuleTime);
+ 713   1        SetAddressValue(0x1011,0);
+ 714   1        SetAddressValue(0x1012,0);
+ 715   1        SetAddressValue(0x1014,1);
+ 716   1        SetSeqAddressValue(0x1020,str2,8);
+ 717   1        SetSeqAddressValue(0x1040,str1,5);
+ 718   1      }
+ 719          
+ 720          void InitPCA()
+ 721          {
+ 722   1      
+ 723   1         //  P_SW1 = 0x10;                 //ECI_2/P2.2, CCP0_2/P2.3, CCP1_2/P2.4, CCP2_2/P2.5,CCP3_2/P2.6
+ 724   1         //  P_SW1 = 0x20;                 //ECI_3/P7.4, CCP0_3/P7.0, CCP1_3/P7.1, CCP2_3/P7.2,CCP3_3/P7.3
+ 725   1         //  P_SW1 = 0x30;                 //ECI_4/P3.5, CCP0_4/P3.3, CCP1_4/P3.2, CCP2_4/P3.1,CCP3_4/P3.0
+ 726   1      
+ 727   1         CCON = 0x00;
+ 728   1         CMOD = 0x08;                  //PCA时钟为系统时钟
+ 729   1         CL = 0x00;
+ 730   1         CH = 0x00;
+ 731   1         CCAPM0 = 0x49;                //PCA模块0为16位定时器模式
+ 732   1         CCAP0L = 1;
+ 733   1         CCAP0H = 0;
+ 734   1         CCF0 = 0;
+ 735   1         CR = 0;                     //启动PCA计时器
+ 736   1      }
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 13  
+
+ 737          
+ 738          
+ 739          void check_button()
+ 740          {
+ 741   1        
+ 742   1        
+ 743   1        
+ 744   1        if (_isOnOff==1 && RFmodle==0)
+ 745   1        {
+ 746   2          if (P35==0 || P67==0) //按键或者脚踏按下
+ 747   2          {
+ 748   3            Delay5ms();
+ 749   3            if ((P35==0 || P67==0))
+ 750   3            {
+ 751   4              if (buttonstatus==0)
+ 752   4                {
+ 753   5                buttonstatus=1;
+ 754   5                if (PauseRFprocess==0)  //停止状态
+ 755   5                  {
+ 756   6                  ADCMaxValue=0;
+ 757   6                  RunningPowerSet=0;
+ 758   6                  BeepCounter=0;
+ 759   6                  Touchdetect=0;
+ 760   6                  RFPowerCounter=0;
+ 761   6                  PauseTime=13;  //130ms
+ 762   6                  PauseRFprocess = 1;  //开始
+ 763   6                  PauseTimes=0;
+ 764   6                  RFoutput=1;
+ 765   6                  TR0=1;   //PWM ON
+ 766   6                  }
+ 767   5                else if (PauseRFprocess==1) //输出状态 按按键
+ 768   5                  {
+ 769   6                  PauseRFprocess=0;  //马上停止输出
+ 770   6                  RFPowerCounter=0;
+ 771   6                  RunningPowerSet=0;
+ 772   6                  BeepCounter=0;
+ 773   6                  Touchdetect=0;
+ 774   6                  TR0=0;  //pwm off  
+ 775   6                  Led1Ctrl(0);
+ 776   6                  P33=0;
+ 777   6                  }
+ 778   5                }
+ 779   4            }
+ 780   3          }
+ 781   2          else 
+ 782   2          {
+ 783   3            if (buttonstatus==1)
+ 784   3              {
+ 785   4              Delay5ms();
+ 786   4              if ((P35==1 && P67==1))   //松开按键
+ 787   4                {
+ 788   5                buttonstatus=0;
+ 789   5                }
+ 790   4              }
+ 791   3          }
+ 792   2      
+ 793   2          
+ 794   2        }
+ 795   1      
+ 796   1      }
+ 797          
+ 798          void main()
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 14  
+
+ 799          {
+ 800   1        u8 i;
+ 801   1        CLOCK_Config();
+ 802   1        Gpio_Init();
+ 803   1        Uart2Init();
+ 804   1        Timer1Init();
+ 805   1        Timer0Init();
+ 806   1        Timer3Init();
+ 807   1        InitPCA();
+ 808   1          PWMInit();
+ 809   1        ADCInit();
+ 810   1        EA=1;
+ 811   1        //开机加载动画
+ 812   1        delay_ms(1000);
+ 813   1      
+ 814   1        for (i=0;i<=6;i++)
+ 815   1          {
+ 816   2          SetAddressValue(0x1013,i);
+ 817   2          
+ 818   2          //Cutpicute(0x0100,3,0x292,0x1c2,683,463,658,450);
+ 819   2          //Cutpicute();
+ 820   2          delay_ms(500);
+ 821   2          }
+ 822   1        for (i=0;i<=6;i++)
+ 823   1          {
+ 824   2          SetAddressValue(0x1013,i);
+ 825   2          
+ 826   2          //Cutpicute(0x0100,3,0x292,0x1c2,683,463,658,450);
+ 827   2          //Cutpicute();
+ 828   2          delay_ms(500);
+ 829   2          }
+ 830   1        SlotCtrl(1);
+ 831   1        Beep();
+ 832   1        ClearUart2Buffer();
+ 833   1        InitLcdDisplay();
+ 834   1        
+ 835   1        LCD_DISPiD=1;
+ 836   1          ChangeDispId(LCD_DISPiD);
+ 837   1        /* Infinite loop */
+ 838   1        while (1)
+ 839   1        {
+ 840   2          check_button();
+ 841   2        DoUartPkg();
+ 842   2        HandleLCD();
+ 843   2        if (NeedUpdateBeep)
+ 844   2          {
+ 845   3          NeedUpdateBeep=0;
+ 846   3          Beep();
+ 847   3          }
+ 848   2        }
+ 849   1      }
+ 850          
+ 851          
+ 852          
+ 853          /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2993    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    111    ----
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V9.56.0.0   MAIN                                                              01/26/2021 18:40:24 PAGE 15  
+
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,283 @@
+C51 COMPILER V9.56.0.0   STC8A_IT                                                          01/26/2021 18:40:24 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE STC8A_IT
+OBJECT MODULE PLACED IN .\Objects\stc8a_it.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE stc8a_it.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src) DEBUG
+                    - PRINT(.\Listings\stc8a_it.lst) TABS(2) OBJECT(.\Objects\stc8a_it.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file     stm8s_it.c
+   4            * @author   MCD Application Team
+   5            * @version  V2.2.0
+   6            * @date     30-September-2014
+   7            * @brief    Main Interrupt Service Routines.
+   8            ******************************************************************************
+   9            * @attention
+  10            *
+  11            * <h2><center>&copy; COPYRIGHT 2014 STMicroelectronics</center></h2>
+  12            *
+  13            * Licensed under MCD-ST Liberty SW License Agreement V2, (the "License");
+  14            * You may not use this file except in compliance with the License.
+  15            * You may obtain a copy of the License at:
+  16            *
+  17            *        http://www.st.com/software_license_agreement_liberty_v2
+  18            *
+  19            * Unless required by applicable law or agreed to in writing, software 
+  20            * distributed under the License is distributed on an "AS IS" BASIS, 
+  21            * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  22            * See the License for the specific language governing permissions and
+  23            * limitations under the License.
+  24            *
+  25            ******************************************************************************
+  26            */ 
+  27          
+  28          /* Includes ------------------------------------------------------------------*/
+  29          //#include "stm8s_it.h"
+  30          #include "main.h"
+  31          #include "uarttask.h"
+  32          #include "PWM.h"
+  33          
+  34          uint8_t Timer0DelayCounter=0;
+  35          
+  36          #define ADC1SUMNUM 100
+  37          
+  38          /** @addtogroup UART1_Interrupt
+  39            * @{
+  40            */
+  41          /* Private typedef -----------------------------------------------------------*/
+  42          /* Private define ------------------------------------------------------------*/
+  43          /*
+  44          #define POW0   (22118400L/166667)   //6us
+  45          #define POW1  (22118400L/129870)     //7.7
+  46          #define POW2  (22118400L/106382)     //9.4
+  47          #define POW3  (22118400L/90090)   //11.1
+  48          #define POW4  (22118400L/78125)   //12.8
+  49          #define POW5  (22118400L/68965)     //14.5
+  50          #define POW6  (22118400L/61728) //16.2
+  51          #define POW7  (22118400L/55865) //17.9
+  52          #define POW8  (22118400L/51020) //19.6
+  53          #define POW9  (22118400L/46948)   //21.3
+  54          #define POW10  (22118400L/43478)   //23
+C51 COMPILER V9.56.0.0   STC8A_IT                                                          01/26/2021 18:40:24 PAGE 2   
+
+  55          #define POW11  (22118400L/40485)   //24.7
+  56          #define POW12  (22118400L/37878)   //26.4
+  57          #define POW13  (22118400L/35587)   //28.1
+  58          #define POW14  (22118400L/33557)   //29.8
+  59          #define POW15  (22118400L/31746)   //31.5
+  60          #define POW16  (22118400L/30120)   //33.2
+  61          #define POW17  (22118400L/28653)   //34.9
+  62          #define POW18  (22118400L/27322)   //36.6
+  63          #define POW19  (22118400L/26109)   //38.3
+  64          #define POW20  (22118400L/25000)   //40
+  65          */
+  66          
+  67          #define POW0   (22118400L/176667)   //5us
+  68          #define POW1   (22118400L/166667)   //6us
+  69          #define POW2  (22118400L/129870)     //7.7
+  70          #define POW3  (22118400L/106382)     //9.4
+  71          #define POW4  (22118400L/90090)   //11.1
+  72          #define POW5  (22118400L/78125)   //12.8
+  73          #define POW6  (22118400L/68965)     //14.5
+  74          #define POW7  (22118400L/61728) //16.2
+  75          #define POW8  (22118400L/55865) //17.9
+  76          //#define POW8  (22118400L/51020) //19.6
+  77          #define POW9  (22118400L/46948)   //21.3
+  78          #define POW10  (22118400L/43478)   //23
+  79          #define POW11  (22118400L/40485)   //24.7
+  80          #define POW12  (22118400L/37878)   //26.4
+  81          #define POW13  (22118400L/35587)   //28.1
+  82          #define POW14  (22118400L/33557)   //29.8
+  83          #define POW15  (22118400L/31746)   //31.5
+  84          #define POW16  (22118400L/30120)   //33.2
+  85          #define POW17  (22118400L/28653)   //34.9
+  86          #define POW18  (22118400L/27322)   //36.6
+  87          #define POW19  (22118400L/26109)   //38.3
+  88          #define POW20  (22118400L/25000)   //40
+  89          
+  90          #define POW52  (22118400L/2/19230)   //52
+  91          /* Private macro -------------------------------------------------------------*/
+  92          /* Private variables ---------------------------------------------------------*/
+  93          
+  94          
+  95          
+  96          
+  97          bit busy;
+  98          volatile uint8_t RxCounter1=0,ReadCounter1=0;
+  99          volatile uint8_t RxByteSize=0;
+ 100          volatile uint8_t  RxBuffer1[RxBufferSize1];
+ 101          
+ 102          uint16_t Rfpowerlist[]={POW0,POW1,POW2,POW3,POW4,POW5,POW6,POW7,POW8,POW9,POW10,
+ 103                      POW11,POW12,POW13,POW14,POW15,POW16,POW17,POW18,POW19,POW20};
+ 104          
+ 105          
+ 106          
+ 107          extern UARTST_ENUM RecStatus;
+ 108          extern u8 RFPower;
+ 109          extern u8 Touchdetect,PauseRFprocess;
+ 110          u16 ADCSUMValue=0;
+ 111          u8 ADCCount=0;
+ 112          //53us rf power control
+ 113          void TM0_Isr() interrupt 1 
+ 114          {
+ 115   1        /* In order to detect unexpected events during development,
+ 116   1           it is recommended to set a breakpoint on the following instruction.
+C51 COMPILER V9.56.0.0   STC8A_IT                                                          01/26/2021 18:40:24 PAGE 3   
+
+ 117   1        */
+ 118   1          uint16_t value;
+ 119   1      
+ 120   1        if (Touchdetect>0)
+ 121   1          {
+ 122   2          value=Rfpowerlist[RFPower];
+ 123   2          }
+ 124   1          else 
+ 125   1            {
+ 126   2           value=Rfpowerlist[0];
+ 127   2            }
+ 128   1      
+ 129   1      
+ 130   1          BeginPwm();
+ 131   1      
+ 132   1        
+ 133   1        
+ 134   1          CL = 0x10;
+ 135   1          CH = 0x00;          
+ 136   1        CCAP0L = value;
+ 137   1          CCAP0H = value>>8;
+ 138   1        CR = 1;   //启动PCA计时器
+ 139   1        
+ 140   1      }
+ 141          
+ 142          void TM1_Isr() interrupt 3
+ 143          {
+ 144   1        /* In order to detect unexpected events during development,
+ 145   1           it is recommended to set a breakpoint on the following instruction.
+ 146   1        */
+ 147   1          Time1OutDelaySub();
+ 148   1      }
+ 149          
+ 150          
+ 151          void TM3_Isr() interrupt 19
+ 152          {                       
+ 153   1      //  T4T3M &= 0xf7;    //定时器3开始计时
+ 154   1      //  P70=1;
+ 155   1      //  P71=1;
+ 156   1        OutputLed1Pwm();
+ 157   1          AUXINTIF &= ~T3IF;                          //清中断标志
+ 158   1          
+ 159   1      }
+ 160          
+ 161          
+ 162          void PCA_Isr() interrupt 7
+ 163          {
+ 164   1      
+ 165   1      
+ 166   1        StopPwm();
+ 167   1          CR = 0;   //启动PCA计时器
+ 168   1        CCF0 = 0;
+ 169   1      
+ 170   1      
+ 171   1      }
+ 172          
+ 173          void Uart2Isr() interrupt 8 
+ 174          {
+ 175   1      
+ 176   1          if (S2CON & 0x02)
+ 177   1          {
+ 178   2              S2CON &= ~0x02;
+C51 COMPILER V9.56.0.0   STC8A_IT                                                          01/26/2021 18:40:24 PAGE 4   
+
+ 179   2              busy = 0;
+ 180   2          }
+ 181   1          
+ 182   1          if (S2CON & 0x01)
+ 183   1          {
+ 184   2              S2CON &= ~0x01;
+ 185   2          UartPkgTimeoutCounter=0;
+ 186   2          RxBuffer1[RxCounter1]=S2BUF;
+ 187   2          RxByteSize++;
+ 188   2          if (RxCounter1<(RxBufferSize1-1)) RxCounter1++; else RxCounter1=0;
+ 189   2          }
+ 190   1      }
+ 191           
+ 192          
+ 193          void ADC_Isr() interrupt 5
+ 194          {
+ 195   1        u8 tempvb;
+ 196   1          ADC_CONTR &= ~0x20;                         //清中断标志
+ 197   1        tempvb=ADC_RES; 
+ 198   1          ADCSUMValue += tempvb;                               //读取ADC结果
+ 199   1          ADCCount++;
+ 200   1        if (ADCCount>=ADC1SUMNUM)
+ 201   1          {
+ 202   2          ADCCount=0;
+ 203   2          ADCValue=ADCSUMValue/ADC1SUMNUM;
+ 204   2            
+ 205   2          ADCSUMValue=0;
+ 206   2          if (ADCValue>ADCMaxValue) ADCMaxValue=ADCValue;
+ 207   2          
+ 208   2          if (_isOnOff==1) 
+ 209   2            {
+ 210   3            if (RFmodle==0 && PauseRFprocess == 1)
+ 211   3              {
+ 212   4              tempvb=ADCCmpValue[0];
+ 213   4              if (ADCMaxValue>=tempvb) 
+ 214   4                {
+ 215   5                Touchdetect=1;
+ 216   5                P33=1;
+ 217   5                }
+ 218   4              }
+ 219   3            else if (RFmodle==1)
+ 220   3              {
+ 221   4              if (RunningPowerSet) 
+ 222   4                tempvb=ADCCmpValue[RFPower]; 
+ 223   4              else 
+ 224   4                tempvb=ADCCmpValue[0];
+ 225   4              
+ 226   4              if (ADCValue>=tempvb) 
+ 227   4                {
+ 228   5                Touchdetect=1;
+ 229   5                P33=1;
+ 230   5                Led2Ctrl(1);
+ 231   5                }
+ 232   4              else 
+ 233   4                {
+ 234   5                Touchdetect=0;
+ 235   5                P33=0;
+ 236   5                Led2Ctrl(0);
+ 237   5                }
+ 238   4              }
+ 239   3            }
+ 240   2          }
+C51 COMPILER V9.56.0.0   STC8A_IT                                                          01/26/2021 18:40:24 PAGE 5   
+
+ 241   1        
+ 242   1        
+ 243   1          ADC_CONTR |= 0x40;                          //继续AD转换
+ 244   1      }
+ 245          
+ 246          
+ 247           
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    768    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    116    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

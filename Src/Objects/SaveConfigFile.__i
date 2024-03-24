@@ -1,0 +1,1 @@
+"SaveConfigFile.c" LARGE OMF2 OPTIMIZE (0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD) DEBUG PRINT(.\Listings\SaveConfigFile.lst) TABS (2) OBJECT(.\Objects\SaveConfigFile.obj)

@@ -1,0 +1,24 @@
+---- LedALLChanels Matches (25 in 4 files) ----
+UpdateLCDLEDSelected in LCD.c (Src\LCD) : 	u8 Dxw=LCD_W /SaveLedData0.LedALLChanels;
+UpdateLCDLEDCloum in LCD.c (Src\LCD) : 	u8 Dxw=LCD_W /SaveLedData0.LedALLChanels;
+UpdateLcdPowerDisplay in LCD.c (Src\LCD) : 	 u8 Dxw=LCD_W /SaveLedData0.LedALLChanels;
+LCD_DrawWorkScreen in LCD.c (Src\LCD) :  u8 Dxw=LCD_W /SaveLedData0.LedALLChanels; 
+LCD_DrawWorkScreen in LCD.c (Src\LCD) : 	if (SaveLedData0.LedALLChanels>=2)
+LCD_DrawWorkScreen in LCD.c (Src\LCD) : 		if (SaveLedData0.LedALLChanels>=3)
+LCD_DrawWorkScreen in LCD.c (Src\LCD) : 			if (SaveLedData0.LedALLChanels>=4)
+DisplaySetting in LCD.c (Src\LCD) : 	DispSettingNumber(2,SaveLedData0.LedALLChanels);
+DoUart4CmdPro in main.c (Src) : 		if (SaveLedData0.LedALLChanels!=usbWRData)
+DoUart4CmdPro in main.c (Src) : 				SaveLedData0.LedALLChanels=usbWRData;
+DoUart4CmdPro in main.c (Src) : 					DispSettingNumber(2,SaveLedData0.LedALLChanels);
+DoUart4CmdPro in main.c (Src) : 		usbWRData=SaveLedData0.LedALLChanels;
+CheckButton in main.c (Src) : 				if (tpv<(SaveLedData0.LedALLChanels)) tpv++; else tpv=1;
+CheckButton in main.c (Src) : 				if (SaveLedData0.LedALLChanels<4) SaveLedData0.LedALLChanels++; 
+CheckButton in main.c (Src) : 				DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+CheckButton in main.c (Src) : 				if (tpv>1) tpv--; else tpv=SaveLedData0.LedALLChanels;
+CheckButton in main.c (Src) : 				if (SaveLedData0.LedALLChanels>1) SaveLedData0.LedALLChanels--; 
+CheckButton in main.c (Src) : 				DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+CheckButton in main.c (Src) : 				else  if (SaveLedData0.LedALLChanels>1)
+CheckButton in main.c (Src) : 				else if (SaveLedData0.LedALLChanels>2)
+CheckButton in main.c (Src) : 				else if (SaveLedData0.LedALLChanels>3)
+ResetSaveData in SaveConfigFile.c (Src) : 	SaveLedData0.LedALLChanels=4;
+{anonSAVEDATAPARAMS} in SaveConfigFile.h (Src) : 	u8 LedALLChanels;

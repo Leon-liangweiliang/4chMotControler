@@ -1,0 +1,390 @@
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE UARTTASK
+OBJECT MODULE PLACED IN .\Objects\uarttask.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE uarttask.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD)
+                    - DEBUG PRINT(.\Listings\uarttask.lst) TABS(2) OBJECT(.\Objects\uarttask.obj)
+
+line level    source
+
+   1          #include "main.h"
+   2          #include "uarttask.h"
+   3          
+   4          
+   5          #define FOSC     33117600UL       //22118400UL
+   6          
+   7          #define BRT_9600             (65536 - FOSC / 9600 / 4)
+   8          #define BRT_250K             (65536 - FOSC / 250000 / 4)
+   9          #define BRT_115200           (65536 - FOSC / 115200 / 4)
+  10          #define BRT_57600             (65536 - FOSC / 57600 / 4)
+  11          
+  12          
+  13          #define ES2 0x01
+  14          #define ES3 0x08
+  15          #define ES4 0x10
+  16          //UART_Memory uart1Memory;
+  17          UART_Memory uart2Memory;
+  18          //UART_Memory uart3Memory;
+  19          //UART_Memory uart4Memory;
+  20          
+  21          
+  22          void Uart2Init(void)    //115200bps@33.1776MHz
+  23          {
+  24   1          S2CON |= 0x10;
+  25   1          T2L = BRT_9600;                                
+  26   1          T2H = BRT_9600>>8;
+  27   1          AUXR |= 0x14;                                //?????
+  28   1          IE2 |= ES2;                                  //??????
+  29   1          ClearMemory((uint8_t*)&uart2Memory,sizeof(UART_Memory));
+  30   1        ClearMemory((u8*)&uart2rcpkg,sizeof(UARTST_PKG));
+  31   1      }
+  32          
+  33          
+  34          void Uart4Init(void)    //115200bps@33.1776MHz
+  35          {
+  36   1        S4CON = 0x10;   //8位数据,可变波特率
+  37   1        S4CON |= 0x40;    //串口4选择定时器4为波特率发生器
+  38   1        T4T3M |= 0x20;    //定时器4时钟为Fosc,即1T
+  39   1        T4L = 0xB8;   //设定定时初值
+  40   1        T4H = 0xFF;   //设定定时初值
+  41   1        T4T3M |= 0x80;    //启动定时器4 
+  42   1        IE2 |= ES4;                                  //??????
+  43   1        ClearMemory((u8*)&uart4rcpkg,sizeof(UARTST4_PKG));
+  44   1      }
+  45          
+  46          void Uart4Init_9600(void)   //9600bps@33.1776MHz
+  47          {
+  48   1        S4CON = 0x10;   //8位数据,可变波特率
+  49   1        S4CON |= 0x40;    //串口4选择定时器4为波特率发生器
+  50   1        T4T3M |= 0x20;    //定时器时钟1T模式
+  51   1        T4L = 0xA0;   //设置定时初始值
+  52   1        T4H = 0xFC;   //设置定时初始值
+  53   1        T4T3M |= 0x80;    //定时器4开始计时
+  54   1        IE2 |= ES4;                                  //??????
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 2   
+
+  55   1        ClearMemory((u8*)&uart4rcpkg,sizeof(UARTST4_PKG));
+  56   1      }
+  57          
+  58          
+  59          
+  60          
+  61          /*
+  62          
+  63          uint8_t CompString(uint8_t *str1,uint8_t *str2,uint8_t len)
+  64          {
+  65            while (len>0)
+  66            {
+  67              if ((*str1)!=(*str2)) return 0;
+  68              len--;
+  69              str1++;
+  70              str2++;
+  71            }
+  72            return 1;
+  73          }
+  74          
+  75          int32_t String2Number(uint8_t *str1)
+  76          {
+  77             int32_t ttm=0;
+  78             int8_t zf=1;
+  79            while (1)
+  80            {
+  81              if ((*str1)>='0' && (*str1)<='9')
+  82                {
+  83                ttm=ttm*10+(*str1)-'0';
+  84                }
+  85              else if ((*str1)=='-')
+  86                {
+  87                 zf=-1;
+  88                }
+  89              else break;
+  90              str1++;
+  91            }
+  92            return zf*ttm;
+  93          }
+  94          */
+  95          
+  96          
+  97          
+  98          /*
+  99            
+ 100          void SetAddressValue(uint16_t add,uint16_t va)
+ 101          {
+ 102            UARTST_PKG sendpkg;
+ 103            sendpkg.pklen=0x05;
+ 104            sendpkg.cmd=0x82;
+ 105            sendpkg.UartRunBuf[0]=add>>8;  //Addr_h
+ 106            sendpkg.UartRunBuf[1]=add&0xff; //Addr_l
+ 107            sendpkg.UartRunBuf[2]=va>>8;  //data1
+ 108            sendpkg.UartRunBuf[3]=va&0xff;  //data1
+ 109            SendToLcd(&sendpkg);
+ 110          }
+ 111          
+ 112          void SetAddressU32Value(uint16_t add,u32 va)
+ 113          {
+ 114            UARTST_PKG sendpkg;
+ 115            sendpkg.pklen=0x07;
+ 116            sendpkg.cmd=0x82;
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 3   
+
+ 117            sendpkg.UartRunBuf[0]=add>>8;  //Addr_h
+ 118            sendpkg.UartRunBuf[1]=add&0xff; //Addr_l
+ 119            sendpkg.UartRunBuf[2]=va>>24; //data1
+ 120            sendpkg.UartRunBuf[3]=va>>16; //data2
+ 121            sendpkg.UartRunBuf[4]=va>>8;  //data3
+ 122            sendpkg.UartRunBuf[5]=va; //data4
+ 123            SendToLcd(&sendpkg);
+ 124          }
+ 125          
+ 126          
+ 127          
+ 128          void ReadDispId(void)
+ 129          {
+ 130            UARTST_PKG sendpkg;
+ 131            
+ 132            sendpkg.pklen=0x03;
+ 133            sendpkg.cmd=0x81;
+ 134            sendpkg.UartRunBuf[0]=0x03;  //Addr
+ 135            sendpkg.UartRunBuf[1]=2;  //data0
+ 136            SendToLcd(&sendpkg);
+ 137          }
+ 138          
+ 139          
+ 140          void ChangeDispId(uint16_t picid)
+ 141          {
+ 142            UARTST_PKG sendpkg;
+ 143            
+ 144            sendpkg.pklen=0x04;
+ 145            sendpkg.cmd=0x80;
+ 146            sendpkg.UartRunBuf[0]=0x03;  //Addr
+ 147            sendpkg.UartRunBuf[1]=picid>>8; //data0
+ 148            sendpkg.UartRunBuf[2]=picid&0xff; //data1
+ 149            SendToLcd(&sendpkg);
+ 150            LCD_DISPiD=picid;
+ 151          }
+ 152          
+ 153          
+ 154          void SetSeqAddressValue(uint16_t add,uint8_t* va,uint8_t num)
+ 155          {
+ 156            UARTST_PKG sendpkg;
+ 157            uint8_t i;
+ 158            sendpkg.pklen=5+num;
+ 159            sendpkg.cmd=0x82;
+ 160            sendpkg.UartRunBuf[0]=add>>8;  //Addr_h
+ 161            sendpkg.UartRunBuf[1]=add&0xff; //Addr_l
+ 162            for (i=0;i<num;i++)
+ 163              {
+ 164              sendpkg.UartRunBuf[2+i]=(*va);  //data
+ 165              va++;
+ 166              }
+ 167          
+ 168            SendToLcd(&sendpkg);
+ 169          }
+ 170          
+ 171          void SetSeqAddressIntValue(uint16_t add,uint8_t* va,uint8_t num)
+ 172          {
+ 173            UARTST_PKG sendpkg;
+ 174            uint8_t i;
+ 175            num=num<<1;
+ 176            sendpkg.pklen=5+num;
+ 177            sendpkg.cmd=0x82;
+ 178            sendpkg.UartRunBuf[0]=add>>8;  //Addr_h
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 4   
+
+ 179            sendpkg.UartRunBuf[1]=add&0xff; //Addr_l
+ 180            for (i=0;i<num;i+=2)
+ 181              {
+ 182              sendpkg.UartRunBuf[2+i]=0;  
+ 183              sendpkg.UartRunBuf[3+i]=(*va);  //data
+ 184              
+ 185              va++;
+ 186              }
+ 187          
+ 188            SendToLcd(&sendpkg);
+ 189          }
+ 190          
+ 191          /*
+ 192          void ClearSeqAddressValue(uint16_t add,uint8_t num)
+ 193          {
+ 194            UARTST_PKG sendpkg;
+ 195            uint8_t i;
+ 196            num=num<<1;
+ 197            sendpkg.pklen=5+num;
+ 198            sendpkg.cmd=0x82;
+ 199            sendpkg.UartRunBuf[0]=add>>8;  //Addr_h
+ 200            sendpkg.UartRunBuf[1]=add&0xff; //Addr_l
+ 201            for (i=0;i<num;i++)
+ 202              {
+ 203              sendpkg.UartRunBuf[2+i]=0;  //data
+ 204              }
+ 205          
+ 206            SendToLcd(&sendpkg);
+ 207          }
+ 208          */
+ 209          
+ 210          void SendToUart2(UARTST_PKG * sendpkg)
+ 211          {
+ 212   1        uint8_t i;
+ 213   1      
+ 214   1          while (uart2Memory.busy==1) WDTRST;                      //清看门狗,否则系统复位
+ 215   1          uart2Memory.busy = 1;
+ 216   1          S2BUF = 0X5A;
+ 217   1      
+ 218   1          while (uart2Memory.busy==1) WDTRST;                      //清看门狗,否则系统复位
+ 219   1          uart2Memory.busy = 1;
+ 220   1          S2BUF = 0XA5;
+ 221   1      
+ 222   1          while (uart2Memory.busy) WDTRST;                      //清看门狗,否则系统复位
+ 223   1          uart2Memory.busy = 1;
+ 224   1          S2BUF = sendpkg->pklen;
+ 225   1      
+ 226   1          while (uart2Memory.busy) WDTRST;                      //清看门狗,否则系统复位
+ 227   1          uart2Memory.busy = 1;
+ 228   1          S2BUF = sendpkg->cmd;
+ 229   1        
+ 230   1        for (i=0;i<(sendpkg->pklen-1);i++)
+ 231   1        {
+ 232   2              while (uart2Memory.busy) WDTRST;                      //清看门狗,否则系统复位
+ 233   2            uart2Memory.busy = 1;
+ 234   2            S2BUF = sendpkg->UartRunBuf[i];
+ 235   2        }
+ 236   1        
+ 237   1      
+ 238   1      }
+ 239          
+ 240          void WriteDriverAddressValue(uint8_t add,uint8_t va)
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 5   
+
+ 241          {
+ 242   1        UARTST_PKG sendpkg;
+ 243   1        sendpkg.pklen=3;
+ 244   1        sendpkg.cmd=0x80;
+ 245   1        sendpkg.UartRunBuf[0]=add;  //Addr_h
+ 246   1        sendpkg.UartRunBuf[1]=va; //data
+ 247   1        SendToUart2(&sendpkg);
+ 248   1      }
+ 249          
+ 250          void WriteDriverAddressValue2(uint8_t add,uint8_t va1,uint8_t va2)
+ 251          {
+ 252   1        UARTST_PKG sendpkg;
+ 253   1        sendpkg.pklen=4;
+ 254   1        sendpkg.cmd=0x80;
+ 255   1        sendpkg.UartRunBuf[0]=add;  //Addr_h
+ 256   1        sendpkg.UartRunBuf[1]=va1;  //data
+ 257   1        sendpkg.UartRunBuf[2]=va2;  //data
+ 258   1        SendToUart2(&sendpkg);
+ 259   1      }
+ 260          
+ 261          
+ 262          
+ 263          void WriteDriverSqAddressValue(uint8_t add,uint8_t* va,uint8_t len)
+ 264          {
+ 265   1        u8 i;
+ 266   1        
+ 267   1        UARTST_PKG sendpkg;
+ 268   1        sendpkg.pklen=2+len;
+ 269   1        sendpkg.cmd=0x80;
+ 270   1        sendpkg.UartRunBuf[0]=add;  //Addr_h
+ 271   1        for (i=0;i<len;i++)
+ 272   1          {
+ 273   2          sendpkg.UartRunBuf[i+1]=*va;  //data
+ 274   2          va++;
+ 275   2          }
+ 276   1        SendToUart2(&sendpkg);
+ 277   1      }
+ 278          
+ 279          
+ 280          
+ 281          void ReadDriverAddressValue(uint8_t add,uint8_t num)
+ 282          {
+ 283   1        UARTST_PKG sendpkg;
+ 284   1        sendpkg.pklen=3;
+ 285   1        sendpkg.cmd=0x81;
+ 286   1        sendpkg.UartRunBuf[0]=add;  //Addr_h
+ 287   1        sendpkg.UartRunBuf[1]=num;  //data1
+ 288   1        SendToUart2(&sendpkg);
+ 289   1      }
+ 290          
+ 291          
+ 292          /*
+ 293          void SendToUart2(UARTST_PKG * sendpkg)
+ 294          {
+ 295            uint8_t i;
+ 296          
+ 297              while (uart2Memory.busy==1) WDTRST;                      //清看门狗,否则系统复位
+ 298              uart2Memory.busy = 1;
+ 299              S2BUF = 0X5A;
+ 300          
+ 301              while (uart2Memory.busy==1) WDTRST;                      //清看门狗,否则系统复位
+ 302              uart2Memory.busy = 1;
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 6   
+
+ 303              S2BUF = 0XA5;
+ 304          
+ 305              while (uart2Memory.busy) WDTRST;                      //清看门狗,否则系统复位
+ 306              uart2Memory.busy = 1;
+ 307              S2BUF = sendpkg->pklen;
+ 308          
+ 309              while (uart2Memory.busy) WDTRST;                      //清看门狗,否则系统复位
+ 310              uart2Memory.busy = 1;
+ 311              S2BUF = sendpkg->cmd;
+ 312            
+ 313            for (i=0;i<(sendpkg->pklen-1);i++)
+ 314            {
+ 315                  while (uart2Memory.busy) WDTRST;                      //清看门狗,否则系统复位
+ 316                uart2Memory.busy = 1;
+ 317                S2BUF = sendpkg->UartRunBuf[i];
+ 318            }
+ 319          
+ 320          }
+ 321          
+ 322          void ReturnRecUart2(uint8_t add,uint8_t* va,uint8_t len)
+ 323          {
+ 324            u8 i;
+ 325            UARTST_PKG sendpkg;
+ 326            sendpkg.pklen=3+len;
+ 327            sendpkg.cmd=0x82;
+ 328            sendpkg.UartRunBuf[0]=add;  //Addr_h
+ 329            sendpkg.UartRunBuf[1]=len;
+ 330            for (i=0;i<len;i++)
+ 331              {
+ 332              sendpkg.UartRunBuf[i+2]=*va;  //data
+ 333              va++;
+ 334              }
+ 335            SendToUart2(&sendpkg);
+ 336          }
+ 337          
+ 338          void SetAddressValueU2(uint16_t add,uint8_t va)
+ 339          {
+ 340            UARTST_PKG sendpkg;
+ 341          //  uint8_t i;
+ 342            sendpkg.pklen=5;
+ 343            sendpkg.cmd=0x82;
+ 344            sendpkg.UartRunBuf[0]=add>>8;  //Addr_h
+ 345            sendpkg.UartRunBuf[1]=add&0xff; //Addr_l
+ 346            sendpkg.UartRunBuf[2]=va; //data
+ 347            SendToUart2(&sendpkg);
+ 348          }
+ 349          */
+ 350          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    600    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    106    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/29/2023 22:43:41 PAGE 7   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

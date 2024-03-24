@@ -1,0 +1,602 @@
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE SPI_FLASH
+OBJECT MODULE PLACED IN .\Objects\spi_flash.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE spi_flash.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD
+                    -) DEBUG PRINT(.\Listings\spi_flash.lst) TABS(2) OBJECT(.\Objects\spi_flash.obj)
+
+line level    source
+
+   1          /******************** (C) COPYRIGHT 2010 www.armjishu.com ********************
+   2          * File Name          : spi_flash.c
+   3          * Author             : www.armjishu.com
+   4          * Version            : V1.0
+   5          * Library            : Using STM32F10X_STDPERIPH_VERSION V3.3.0
+   6          * Date               : 10/16/2010
+   7          * Description        : This file provides a set of functions needed to manage the
+   8          *                      communication between SPI peripheral and SPI W25X16 FLASH.
+   9          *******************************************************************************/
+  10          
+  11          /* Includes ------------------------------------------------------------------*/
+  12          #include "main.h"
+  13          #include "intrins.h"
+  14          #include "spi_flash.h"
+  15          //---------------------------接线说明-------------------------------------//
+  16          //引脚定义
+  17          sbit SPI_CS        =P2^2;
+  18          sbit SPI_MISO       =P2^4;
+  19          sbit SPI_MOSI       =P2^3;
+  20          sbit SPI_SCLK        =P2^5;
+  21          
+  22          /* Private typedef -----------------------------------------------------------*/
+  23          
+  24          
+  25          /* Private define ------------------------------------------------------------*/
+  26          //#define nopsw _nop_();_nop_();_nop_();_nop_();
+  27          
+  28          #define W25X_WriteEnable    0x06 
+  29          #define W25X_WriteDisable   0x04 
+  30          #define W25X_ReadStatusReg    0x05 
+  31          #define W25X_WriteStatusReg   0x01 
+  32          #define W25X_ReadData     0x03 
+  33          #define W25X_FastReadData   0x0B 
+  34          #define W25X_FastReadDual   0x3B 
+  35          #define W25X_PageProgram    0x02 
+  36          #define W25X_BlockErase     0xD8 
+  37          #define W25X_SectorErase    0x20 
+  38          #define W25X_ChipErase      0xC7 
+  39          #define W25X_PowerDown      0xB9 
+  40          #define W25X_ReleasePowerDown 0xAB 
+  41          #define W25X_DeviceID     0xAB 
+  42          #define W25X_ManufactDeviceID 0x90 
+  43          #define W25X_JedecDeviceID    0x9F 
+  44          
+  45          #define WIP_Flag                0x01  /* Write In Progress (WIP) flag */
+  46          
+  47          #define Dummy_Byte              0xA5
+  48          #define SET      1
+  49          #define RESET    0
+  50          
+  51          /* Private macro -------------------------------------------------------------*/
+  52          /* Private variables ---------------------------------------------------------*/
+  53          /* Private function prototypes -----------------------------------------------*/
+  54          /* Private functions ---------------------------------------------------------*/
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 2   
+
+  55          
+  56          /*******************************************************************************
+  57          * Function Name  : SPI_FLASH_Init
+  58          * Description    : Initializes the peripherals used by the SPI FLASH driver.
+  59          * Input          : None
+  60          * Output         : None
+  61          * Return         : None
+  62          *******************************************************************************/
+  63          void SPI_FLASH_Init(void)
+  64          {
+  65   1        SPI_CS = 1;
+  66   1        SPI_SCLK=1;
+  67   1        SPI_MOSI=1;
+  68   1        SPI_MISO=1;
+  69   1       //   SPCTL = 0x50;                               //使能SPI主机模式
+  70   1      //    SPSTAT = 0xc0;                              //清中断标志
+  71   1      }
+  72          
+  73          //**************************************************
+  74          //**************************************************
+  75          /*******************************************************************************
+  76          * Function Name  : SPI_FLASH_SectorErase
+  77          * Description    : Erases the specified FLASH sector.
+  78          * Input          : SectorAddr: address of the sector to erase.
+  79          * Output         : None
+  80          * Return         : None
+  81          *******************************************************************************/
+  82          void SPI_FLASH_SectorErase(u32 SectorAddr)
+  83          {
+  84   1        /* Send write enable instruction */
+  85   1        SPI_FLASH_WriteEnable();
+  86   1      
+  87   1        /* Sector Erase */
+  88   1        /* Select the FLASH: Chip Select low */
+  89   1        SPI_CS=0;
+  90   1        /* Send Sector Erase instruction */
+  91   1        SPI_FLASH_SendByte(W25X_SectorErase);
+  92   1        /* Send SectorAddr high nibble address byte */
+  93   1        SPI_FLASH_SendByte((SectorAddr & 0xFF0000) >> 16);
+  94   1        /* Send SectorAddr medium nibble address byte */
+  95   1        SPI_FLASH_SendByte((SectorAddr & 0xFF00) >> 8);
+  96   1        /* Send SectorAddr low nibble address byte */
+  97   1        SPI_FLASH_SendByte(SectorAddr & 0xFF);
+  98   1        /* Deselect the FLASH: Chip Select high */
+  99   1        SPI_CS=1;
+ 100   1      
+ 101   1        /* Wait the end of Flash writing */
+ 102   1        SPI_FLASH_WaitForWriteEnd();
+ 103   1      }
+ 104          
+ 105          /*******************************************************************************
+ 106          * Function Name  : SPI_FLASH_BulkErase
+ 107          * Description    : Erases the entire FLASH.
+ 108          * Input          : None
+ 109          * Output         : None
+ 110          * Return         : None
+ 111          *******************************************************************************/
+ 112          void SPI_FLASH_BulkErase(void)
+ 113          {
+ 114   1        /* Send write enable instruction */
+ 115   1        SPI_FLASH_WriteEnable();
+ 116   1      
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 3   
+
+ 117   1        /* Bulk Erase */
+ 118   1        /* Select the FLASH: Chip Select low */
+ 119   1        SPI_CS=0;
+ 120   1        /* Send Bulk Erase instruction  */
+ 121   1        SPI_FLASH_SendByte(W25X_ChipErase);
+ 122   1        /* Deselect the FLASH: Chip Select high */
+ 123   1        SPI_CS=1;
+ 124   1      
+ 125   1        /* Wait the end of Flash writing */
+ 126   1        SPI_FLASH_WaitForWriteEnd();
+ 127   1      }
+ 128          
+ 129          /*******************************************************************************
+ 130          * Function Name  : SPI_FLASH_PageWrite
+ 131          * Description    : Writes more than one byte to the FLASH with a single WRITE
+ 132          *                  cycle(Page WRITE sequence). The number of byte can't exceed
+ 133          *                  the FLASH page size.
+ 134          * Input          : - pBuffer : pointer to the buffer  containing the data to be
+ 135          *                    written to the FLASH.
+ 136          *                  - WriteAddr : FLASH's internal address to write to.
+ 137          *                  - NumByteToWrite : number of bytes to write to the FLASH,
+ 138          *                    must be equal or less than "SPI_FLASH_PageSize" value.
+ 139          * Output         : None
+ 140          * Return         : None
+ 141          *******************************************************************************/
+ 142          void SPI_FLASH_PageWrite(u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
+ 143          {
+ 144   1      
+ 145   1      
+ 146   1      
+ 147   1        /* Enable the write access to the FLASH */
+ 148   1        SPI_FLASH_WriteEnable();
+ 149   1      
+ 150   1        /* Select the FLASH: Chip Select low */
+ 151   1        SPI_CS=0;
+ 152   1        /* Send "Write to Memory " instruction */
+ 153   1        SPI_FLASH_SendByte(W25X_PageProgram);
+ 154   1        /* Send WriteAddr high nibble address byte to write to */
+ 155   1        SPI_FLASH_SendByte((WriteAddr & 0xFF0000) >> 16);
+ 156   1        /* Send WriteAddr medium nibble address byte to write to */
+ 157   1        SPI_FLASH_SendByte((WriteAddr & 0xFF00) >> 8);
+ 158   1        /* Send WriteAddr low nibble address byte to write to */
+ 159   1        SPI_FLASH_SendByte(WriteAddr & 0xFF);
+ 160   1      
+ 161   1        if(NumByteToWrite > SPI_FLASH_PerWritePageSize)
+ 162   1        {
+ 163   2           NumByteToWrite = SPI_FLASH_PerWritePageSize;
+ 164   2      //     printf("\n\r Err: SPI_FLASH_PageWrite too large!");
+ 165   2        }
+ 166   1      
+ 167   1        /* while there is data to be written on the FLASH */
+ 168   1        while (NumByteToWrite--)
+ 169   1        {
+ 170   2          /* Send the current byte */
+ 171   2          SPI_FLASH_SendByte(*pBuffer);
+ 172   2          /* Point on the next byte to be written */
+ 173   2          pBuffer++;
+ 174   2        }
+ 175   1      
+ 176   1        /* Deselect the FLASH: Chip Select high */
+ 177   1        SPI_CS=1;
+ 178   1      
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 4   
+
+ 179   1        /* Wait the end of Flash writing */
+ 180   1        SPI_FLASH_WaitForWriteEnd();
+ 181   1      }
+ 182          
+ 183          /*******************************************************************************
+ 184          * Function Name  : SPI_FLASH_BufferWrite
+ 185          * Description    : Writes block of data to the FLASH. In this function, the
+ 186          *                  number of WRITE cycles are reduced, using Page WRITE sequence.
+ 187          * Input          : - pBuffer : pointer to the buffer  containing the data to be
+ 188          *                    written to the FLASH.
+ 189          *                  - WriteAddr : FLASH's internal address to write to.
+ 190          *                  - NumByteToWrite : number of bytes to write to the FLASH.
+ 191          * Output         : None
+ 192          * Return         : None
+ 193          *******************************************************************************/
+ 194          void SPI_FLASH_BufferWrite(const u8* pBuffer, u32 WriteAddr, u16 NumByteToWrite)
+ 195          {
+ 196   1      
+ 197   1        
+ 198   1        u8 NumOfPage = 0, NumOfSingle = 0, Addr = 0, count = 0, temp = 0;
+ 199   1      
+ 200   1        
+ 201   1        Addr = WriteAddr % SPI_FLASH_PageSize;
+ 202   1        count = SPI_FLASH_PageSize - Addr;
+ 203   1        NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
+ 204   1        NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
+ 205   1      
+ 206   1      
+ 207   1        
+ 208   1        if (Addr == 0) /* WriteAddr is SPI_FLASH_PageSize aligned  */
+ 209   1        {
+ 210   2          if (NumOfPage == 0) /* NumByteToWrite < SPI_FLASH_PageSize */
+ 211   2          {
+ 212   3            SPI_FLASH_PageWrite(pBuffer, WriteAddr, NumByteToWrite);
+ 213   3          }
+ 214   2          else /* NumByteToWrite > SPI_FLASH_PageSize */
+ 215   2          {
+ 216   3            while (NumOfPage--)
+ 217   3            {
+ 218   4          /*  
+ 219   4          if (SectorAddr!=(WriteAddr/SPI_FLASH_SectorSize))
+ 220   4          {
+ 221   4            SPI_FLASH_SectorErase(WriteAddr);
+ 222   4              SectorAddr=WriteAddr/SPI_FLASH_SectorSize;
+ 223   4          }*/
+ 224   4              SPI_FLASH_PageWrite(pBuffer, WriteAddr, SPI_FLASH_PageSize);
+ 225   4              WriteAddr +=  SPI_FLASH_PageSize;
+ 226   4              pBuffer += SPI_FLASH_PageSize;
+ 227   4            }
+ 228   3        /*
+ 229   3          if (SectorAddr!=(WriteAddr/SPI_FLASH_SectorSize))
+ 230   3          {
+ 231   3            SPI_FLASH_SectorErase(WriteAddr);
+ 232   3              SectorAddr=WriteAddr/SPI_FLASH_SectorSize;
+ 233   3          }*/
+ 234   3            SPI_FLASH_PageWrite(pBuffer, WriteAddr, NumOfSingle);
+ 235   3          }
+ 236   2        }
+ 237   1        else /* WriteAddr is not SPI_FLASH_PageSize aligned  */
+ 238   1        {
+ 239   2          if (NumOfPage == 0) /* NumByteToWrite < SPI_FLASH_PageSize */
+ 240   2          {
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 5   
+
+ 241   3            if (NumOfSingle > count) /* (NumByteToWrite + WriteAddr) > SPI_FLASH_PageSize */
+ 242   3            {
+ 243   4              temp = NumOfSingle - count;
+ 244   4              SPI_FLASH_PageWrite(pBuffer, WriteAddr, count);
+ 245   4              WriteAddr +=  count;
+ 246   4              pBuffer += count;
+ 247   4        /*
+ 248   4          if (SectorAddr!=(WriteAddr/SPI_FLASH_SectorSize))
+ 249   4          {
+ 250   4            SPI_FLASH_SectorErase(WriteAddr);
+ 251   4              SectorAddr=WriteAddr/SPI_FLASH_SectorSize;
+ 252   4          } */
+ 253   4              SPI_FLASH_PageWrite(pBuffer, WriteAddr, temp);
+ 254   4            }
+ 255   3            else
+ 256   3            {
+ 257   4        /*      if (SectorAddr!=(WriteAddr/SPI_FLASH_SectorSize))
+ 258   4          {
+ 259   4            SPI_FLASH_SectorErase(WriteAddr);
+ 260   4              SectorAddr=WriteAddr/SPI_FLASH_SectorSize;
+ 261   4          } */
+ 262   4              SPI_FLASH_PageWrite(pBuffer, WriteAddr, NumByteToWrite);
+ 263   4            }
+ 264   3          }
+ 265   2          else /* NumByteToWrite > SPI_FLASH_PageSize */
+ 266   2          {
+ 267   3            NumByteToWrite -= count;
+ 268   3            NumOfPage =  NumByteToWrite / SPI_FLASH_PageSize;
+ 269   3            NumOfSingle = NumByteToWrite % SPI_FLASH_PageSize;
+ 270   3          
+ 271   3            SPI_FLASH_PageWrite(pBuffer, WriteAddr, count);
+ 272   3            WriteAddr +=  count;
+ 273   3            pBuffer += count;
+ 274   3      
+ 275   3            while (NumOfPage--)
+ 276   3            {
+ 277   4        /*    if (SectorAddr!=(WriteAddr/SPI_FLASH_SectorSize))
+ 278   4          {
+ 279   4            SPI_FLASH_SectorErase(WriteAddr);
+ 280   4              SectorAddr=WriteAddr/SPI_FLASH_SectorSize;
+ 281   4          } */
+ 282   4              SPI_FLASH_PageWrite(pBuffer, WriteAddr, SPI_FLASH_PageSize);
+ 283   4              WriteAddr +=  SPI_FLASH_PageSize;
+ 284   4              pBuffer += SPI_FLASH_PageSize;
+ 285   4            }
+ 286   3      
+ 287   3            if (NumOfSingle != 0)
+ 288   3            {
+ 289   4      /*      if (SectorAddr!=(WriteAddr/SPI_FLASH_SectorSize))
+ 290   4          {
+ 291   4            SPI_FLASH_SectorErase(WriteAddr);
+ 292   4              SectorAddr=WriteAddr/SPI_FLASH_SectorSize;
+ 293   4          } */
+ 294   4              SPI_FLASH_PageWrite(pBuffer, WriteAddr, NumOfSingle);
+ 295   4            }
+ 296   3          }
+ 297   2        }
+ 298   1      }
+ 299          
+ 300          /*******************************************************************************
+ 301          * Function Name  : SPI_FLASH_BufferRead
+ 302          * Description    : Reads a block of data from the FLASH.
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 6   
+
+ 303          * Input          : - pBuffer : pointer to the buffer that receives the data read
+ 304          *                    from the FLASH.
+ 305          *                  - ReadAddr : FLASH's internal address to read from.
+ 306          *                  - NumByteToRead : number of bytes to read from the FLASH.
+ 307          * Output         : None
+ 308          * Return         : None
+ 309          *******************************************************************************/
+ 310          void SPI_FLASH_BufferRead(u8* pBuffer, u32 ReadAddr, u16 NumByteToRead)
+ 311          {
+ 312   1        /* Select the FLASH: Chip Select low */
+ 313   1        SPI_CS=0;
+ 314   1      
+ 315   1        /* Send "Read from Memory " instruction */
+ 316   1        SPI_FLASH_SendByte(W25X_ReadData);
+ 317   1      
+ 318   1        /* Send ReadAddr high nibble address byte to read from */
+ 319   1        SPI_FLASH_SendByte((ReadAddr & 0xFF0000) >> 16);
+ 320   1        /* Send ReadAddr medium nibble address byte to read from */
+ 321   1        SPI_FLASH_SendByte((ReadAddr& 0xFF00) >> 8);
+ 322   1        /* Send ReadAddr low nibble address byte to read from */
+ 323   1        SPI_FLASH_SendByte(ReadAddr & 0xFF);
+ 324   1      
+ 325   1        while (NumByteToRead--) /* while there is data to be read */
+ 326   1        {
+ 327   2          /* Read a byte from the FLASH */
+ 328   2          *pBuffer = SPI_FLASH_ReadByte();
+ 329   2          /* Point to the next location where the byte read will be saved */
+ 330   2          pBuffer++;
+ 331   2        }
+ 332   1      
+ 333   1        /* Deselect the FLASH: Chip Select high */
+ 334   1        SPI_CS=1;
+ 335   1      }
+ 336          
+ 337          /*******************************************************************************
+ 338          * Function Name  : SPI_FLASH_ReadID
+ 339          * Description    : Reads FLASH identification.
+ 340          * Input          : None
+ 341          * Output         : None
+ 342          * Return         : FLASH identification
+ 343          *******************************************************************************/
+ 344          u32 SPI_FLASH_ReadID(void)
+ 345          {
+ 346   1        u32 Temp = 0, Temp0 = 0, Temp1 = 0, Temp2 = 0;
+ 347   1      
+ 348   1        /* Select the FLASH: Chip Select low */
+ 349   1        SPI_CS=0;
+ 350   1      
+ 351   1        /* Send "RDID " instruction */
+ 352   1        SPI_FLASH_SendByte(W25X_JedecDeviceID);
+ 353   1      
+ 354   1        /* Read a byte from the FLASH */
+ 355   1        Temp0 = SPI_FLASH_ReadByte();
+ 356   1      
+ 357   1        /* Read a byte from the FLASH */
+ 358   1        Temp1 = SPI_FLASH_ReadByte();
+ 359   1      
+ 360   1        /* Read a byte from the FLASH */
+ 361   1        Temp2 = SPI_FLASH_ReadByte();
+ 362   1      
+ 363   1        /* Deselect the FLASH: Chip Select high */
+ 364   1        SPI_CS=1;
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 7   
+
+ 365   1        Temp = (Temp0 << 16) | (Temp1 << 8) | Temp2;
+ 366   1      
+ 367   1        return Temp;
+ 368   1      }
+ 369          /*******************************************************************************
+ 370          * Function Name  : SPI_FLASH_ReadID
+ 371          * Description    : Reads FLASH identification.
+ 372          * Input          : None
+ 373          * Output         : None
+ 374          * Return         : FLASH identification
+ 375          *******************************************************************************/
+ 376          u8 SPI_FLASH_ReadDeviceID(void)
+ 377          {
+ 378   1        u8 Temp = 0;
+ 379   1      
+ 380   1        /* Select the FLASH: Chip Select low */
+ 381   1        SPI_CS=0;
+ 382   1      
+ 383   1        /* Send "RDID " instruction */
+ 384   1        SPI_FLASH_SendByte(W25X_DeviceID);
+ 385   1        SPI_FLASH_SendByte(Dummy_Byte);
+ 386   1        SPI_FLASH_SendByte(Dummy_Byte);
+ 387   1        SPI_FLASH_SendByte(Dummy_Byte);
+ 388   1        
+ 389   1        /* Read a byte from the FLASH */
+ 390   1        Temp = SPI_FLASH_ReadByte();
+ 391   1      
+ 392   1        /* Deselect the FLASH: Chip Select high */
+ 393   1        SPI_CS=1;
+ 394   1      
+ 395   1        return Temp;
+ 396   1      }
+ 397          /*******************************************************************************
+ 398          * Function Name  : SPI_FLASH_StartReadSequence
+ 399          * Description    : Initiates a read data byte (READ) sequence from the Flash.
+ 400          *                  This is done by driving the /CS line low to select the device,
+ 401          *                  then the READ instruction is transmitted followed by 3 bytes
+ 402          *                  address. This function exit and keep the /CS line low, so the
+ 403          *                  Flash still being selected. With this technique the whole
+ 404          *                  content of the Flash is read with a single READ instruction.
+ 405          * Input          : - ReadAddr : FLASH's internal address to read from.
+ 406          * Output         : None
+ 407          * Return         : None
+ 408          *******************************************************************************/
+ 409          void SPI_FLASH_StartReadSequence(u32 ReadAddr)
+ 410          {
+ 411   1        /* Select the FLASH: Chip Select low */
+ 412   1        SPI_CS=0;
+ 413   1      
+ 414   1        /* Send "Read from Memory " instruction */
+ 415   1        SPI_FLASH_SendByte(W25X_ReadData);
+ 416   1      
+ 417   1        /* Send the 24-bit address of the address to read from -----------------------*/
+ 418   1        /* Send ReadAddr high nibble address byte */
+ 419   1        SPI_FLASH_SendByte((ReadAddr & 0xFF0000) >> 16);
+ 420   1        /* Send ReadAddr medium nibble address byte */
+ 421   1        SPI_FLASH_SendByte((ReadAddr& 0xFF00) >> 8);
+ 422   1        /* Send ReadAddr low nibble address byte */
+ 423   1        SPI_FLASH_SendByte(ReadAddr & 0xFF);
+ 424   1      }
+ 425          
+ 426          /*******************************************************************************
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 8   
+
+ 427          * Function Name  : SPI_FLASH_ReadByte
+ 428          * Description    : Reads a byte from the SPI Flash.
+ 429          *                  This function must be used only if the Start_Read_Sequence
+ 430          *                  function has been previously called.
+ 431          * Input          : None
+ 432          * Output         : None
+ 433          * Return         : Byte Read from the SPI Flash.
+ 434          *******************************************************************************/
+ 435          u8 SPI_FLASH_ReadByte(void)
+ 436          {
+ 437   1        unsigned char i;
+ 438   1        u8 ret=0;
+ 439   1        for(i=0;i<8;i++)
+ 440   1        {
+ 441   2          SPI_SCLK=0;
+ 442   2          ret<<=1;
+ 443   2          SPI_SCLK=1;
+ 444   2          if(SPI_MISO==1) ret|=1; //输出数据
+ 445   2        }
+ 446   1        return ret;
+ 447   1      }
+ 448          
+ 449          /*******************************************************************************
+ 450          * Function Name  : SPI_FLASH_SendByte
+ 451          * Description    : Sends a byte through the SPI interface and return the byte
+ 452          *                  received from the SPI bus.
+ 453          * Input          : byte : byte to send.
+ 454          * Output         : None
+ 455          * Return         : The value of the received byte.
+ 456          *******************************************************************************/
+ 457          
+ 458          
+ 459          
+ 460          
+ 461          void SPI_FLASH_SendByte(u8 byte2)
+ 462          {
+ 463   1        unsigned char i;
+ 464   1        
+ 465   1        for(i=0;i<8;i++)
+ 466   1        {
+ 467   2          if(byte2&0x80)  
+ 468   2            SPI_MOSI=1; //输出数据
+ 469   2          else 
+ 470   2            SPI_MOSI=0;
+ 471   2          SPI_SCLK=0;
+ 472   2          SPI_SCLK=1;
+ 473   2          byte2<<=1;
+ 474   2        }
+ 475   1      }
+ 476          
+ 477          
+ 478          
+ 479          /*******************************************************************************
+ 480          * Function Name  : SPI_FLASH_WriteEnable
+ 481          * Description    : Enables the write access to the FLASH.
+ 482          * Input          : None
+ 483          * Output         : None
+ 484          * Return         : None
+ 485          *******************************************************************************/
+ 486          void SPI_FLASH_WriteEnable(void)
+ 487          {
+ 488   1        /* Select the FLASH: Chip Select low */
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 9   
+
+ 489   1        SPI_CS=0;
+ 490   1      
+ 491   1        /* Send "Write Enable" instruction */
+ 492   1        SPI_FLASH_SendByte(W25X_WriteEnable);
+ 493   1      
+ 494   1        /* Deselect the FLASH: Chip Select high */
+ 495   1        SPI_CS=1;
+ 496   1      }
+ 497          
+ 498          /*******************************************************************************
+ 499          * Function Name  : SPI_FLASH_WaitForWriteEnd
+ 500          * Description    : Polls the status of the Write In Progress (WIP) flag in the
+ 501          *                  FLASH's status  register  and  loop  until write  opertaion
+ 502          *                  has completed.
+ 503          * Input          : None
+ 504          * Output         : None
+ 505          * Return         : None
+ 506          *******************************************************************************/
+ 507          void SPI_FLASH_WaitForWriteEnd(void)
+ 508          {
+ 509   1        u8 FLASH_Status = 0;
+ 510   1      
+ 511   1       
+ 512   1        /* Loop as long as the memory is busy with a write cycle */
+ 513   1        do
+ 514   1        {
+ 515   2          /* Select the FLASH: Chip Select low */
+ 516   2          SPI_CS=0;
+ 517   2      
+ 518   2          /* Send "Read Status Register" instruction */
+ 519   2          SPI_FLASH_SendByte(W25X_ReadStatusReg);
+ 520   2          /* Send a dummy byte to generate the clock needed by the FLASH
+ 521   2          and put the value of the status register in FLASH_Status variable */
+ 522   2          FLASH_Status = SPI_FLASH_ReadByte();
+ 523   2         /* Deselect the FLASH: Chip Select high */
+ 524   2         SPI_CS=1;
+ 525   2         
+ 526   2        } while ((FLASH_Status & WIP_Flag) == SET);  /* Write in progress */
+ 527   1      
+ 528   1       
+ 529   1      }
+ 530          
+ 531          
+ 532          //进入掉电模式
+ 533          void SPI_Flash_PowerDown(void)   
+ 534          { 
+ 535   1        /* Select the FLASH: Chip Select low */
+ 536   1        SPI_CS=0;
+ 537   1        /* Send "Power Down" instruction */
+ 538   1        SPI_FLASH_SendByte(W25X_PowerDown);
+ 539   1      
+ 540   1        /* Deselect the FLASH: Chip Select high */
+ 541   1        SPI_CS=1;
+ 542   1      }   
+ 543          
+ 544          //唤醒
+ 545          void SPI_Flash_WAKEUP(void)   
+ 546          {
+ 547   1        /* Select the FLASH: Chip Select low */
+ 548   1        SPI_CS=0;
+ 549   1      
+ 550   1        /* Send "Power Down" instruction */
+C51 COMPILER V9.56.0.0   SPI_FLASH                                                         01/29/2023 22:43:41 PAGE 10  
+
+ 551   1        SPI_FLASH_SendByte(W25X_ReleasePowerDown);
+ 552   1      
+ 553   1        /* Deselect the FLASH: Chip Select high */
+ 554   1        SPI_CS=1;                           //等待TRES1
+ 555   1      }   
+ 556          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1738    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     62    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

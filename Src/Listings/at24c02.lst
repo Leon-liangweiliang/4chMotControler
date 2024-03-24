@@ -1,0 +1,392 @@
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE AT24C02
+OBJECT MODULE PLACED IN .\Objects\at24c02.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE at24c02.C LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD) 
+                    -DEBUG PRINT(.\Listings\at24c02.lst) TABS(2) OBJECT(.\Objects\at24c02.obj)
+
+line level    source
+
+   1          #include "main.h"
+   2          #include "intrins.h"
+   3          
+   4          
+   5          #define nopsw _nop_();_nop_();_nop_();_nop_();_nop_();_nop_();_nop_();_nop_();_nop_();
+   6          #define DIAddr     0xA0
+   7          #define I2C_PAGESIZE    16
+   8          
+   9          /*
+  10          #define I2C_GPIO   GPIOE
+  11          #define SCL_GION_PIN  GPIO_PIN_1
+  12          #define SDA_GION_PIN  GPIO_PIN_2
+  13          */
+  14          //GPIO_WriteHigh(I2C_GPIO, SDA_GION_PIN)
+  15          #define SDA_HIGH  P14=1  
+  16          #define SDA_LOW  P14=0 
+  17          //GPIO_WriteLow(I2C_GPIO, SDA_GION_PIN)
+  18          #define SCL_HIGH  P15=1 
+  19          //GPIO_WriteHigh(I2C_GPIO, SCL_GION_PIN)
+  20          #define SCL_LOW  P15=0 
+  21          //GPIO_WriteLow(I2C_GPIO, SCL_GION_PIN)
+  22          #define GET_SDA  P14==1
+  23          //GPIO_ReadInputPin(I2C_GPIO, SDA_GION_PIN)
+  24          
+  25          #define EEP_HIGH P16=1
+  26          #define EEP_LOW P16=0
+  27          
+  28          uint8_t   ack;
+  29          
+  30          void Init_I2c_GPIO(void)
+  31          {
+  32   1        //GPIO_Init(I2C_GPIO, (GPIO_Pin_TypeDef)(SCL_GION_PIN | SDA_GION_PIN), GPIO_MODE_OUT_OD_HIZ_FAST);
+  33   1        SDA_HIGH;
+  34   1        SCL_HIGH;
+  35   1        //EEPROM WP
+  36   1        //GPIO_Init(EEP_WP_GPIO,(GPIO_Pin_TypeDef)(WP_GION_PIN), GPIO_MODE_OUT_PP_HIGH_FAST);
+  37   1        //GPIO_WriteHigh(EEP_WP_GPIO,(GPIO_Pin_TypeDef)(WP_GION_PIN));
+  38   1        EEP_HIGH;
+  39   1      }
+  40          
+  41          
+  42          
+  43          
+  44          /*******************************************************************
+  45                               起动总线函数               
+  46          函数原型: void  Start_I2c();  
+  47          功能:       启动I2C总线,即发送I2C起始条件.
+  48            
+  49          ********************************************************************/
+  50          void Start_I2c(void)
+  51          {
+  52   1        SDA_HIGH;     /*发送起始条件的数据信号*/
+  53   1        delay_us(10);  /*发送结束条件的时钟信号*/
+  54   1        SCL_HIGH;
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 2   
+
+  55   1        delay_us(10); /*起始条件建立时间大于4.7us,延时*/
+  56   1        SDA_LOW;     /*发送起始信号*/
+  57   1        delay_us(10);  /* 起始条件锁定时间大于4μs*/     
+  58   1        SCL_LOW;     /*钳住I2C总线，准备发送或接收数据 */
+  59   1        nopsw;
+  60   1        nopsw;
+  61   1      }
+  62          
+  63          /*******************************************************************
+  64                                结束总线函数               
+  65          函数原型: void  Stop_I2c();  
+  66          功能:       结束I2C总线,即发送I2C结束条件.
+  67            
+  68          ********************************************************************/
+  69          void Stop_I2c(void)
+  70          {
+  71   1        SDA_LOW;    /*发送结束条件的数据信号*/
+  72   1        nopsw;   /*发送结束条件的时钟信号*/
+  73   1        nopsw;   /*发送结束条件的时钟信号*/
+  74   1        SCL_HIGH;    /*结束条件建立时间大于4μs*/
+  75   1      delay_us(10); 
+  76   1        SDA_HIGH;    /*发送I2C总线结束信号*/
+  77   1        nopsw;
+  78   1        nopsw;
+  79   1        nopsw;
+  80   1        nopsw;
+  81   1      }
+  82          
+  83          /*******************************************************************
+  84                           字节数据传送函数               
+  85          函数原型: void  SendByte(uchar c);
+  86          功能:  将数据c发送出去,可以是地址,也可以是数据,发完后等待应答,并对
+  87               此状态位进行操作.(不应答或非应答都使ack=0 假)     
+  88               发送数据正常，ack=1; ack=0表示被控器无应答或损坏。
+  89          ********************************************************************/
+  90          void  SendByte(uint8_t c)
+  91          {
+  92   1       uint8_t BitCnt;
+  93   1       
+  94   1       for(BitCnt=0;BitCnt<8;BitCnt++)  /*要传送的数据长度为8位*/
+  95   1          {
+  96   2           if(((c<<BitCnt)&0x80)!=0)SDA_HIGH;   /*判断发送位*/
+  97   2             else  SDA_LOW;                
+  98   2           nopsw;
+  99   2           SCL_HIGH;                 /*置时钟线为高，通知被控器开始接收数据位*/
+ 100   2         delay_us(10);   /*保证时钟高电平周期大于4μs*/     
+ 101   2           SCL_LOW; 
+ 102   2          }
+ 103   1          
+ 104   1          nopsw;
+ 105   1          nopsw;
+ 106   1         SDA_HIGH;                 /*8位发送完后释放数据线，准备接收应答位*/
+ 107   1          nopsw;
+ 108   1          nopsw;   
+ 109   1          SCL_HIGH;
+ 110   1        //GPIO_Init(I2C_GPIO, (GPIO_Pin_TypeDef)(SDA_GION_PIN), GPIO_MODE_IN_FL_NO_IT);
+ 111   1          nopsw;
+ 112   1          nopsw;
+ 113   1          nopsw;
+ 114   1        
+ 115   1        
+ 116   1          if(GET_SDA)ack=0;     
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 3   
+
+ 117   1             else ack=1;        /*判断是否接收到应答信号*/
+ 118   1          SCL_LOW;
+ 119   1          nopsw;
+ 120   1          nopsw;
+ 121   1        //GPIO_Init(I2C_GPIO, (GPIO_Pin_TypeDef)(SDA_GION_PIN), GPIO_MODE_OUT_OD_HIZ_FAST);
+ 122   1      }
+ 123          
+ 124          /*******************************************************************
+ 125                           字节数据传送函数               
+ 126          函数原型: uchar  RcvByte();
+ 127          功能:  用来接收从器件传来的数据,并判断总线错误(不发应答信号)，
+ 128               发完后请用应答函数。  
+ 129          ********************************************************************/ 
+ 130          uint8_t  RcvByte(void)
+ 131          {
+ 132   1        uint8_t retc;
+ 133   1        uint8_t BitCnt;
+ 134   1        
+ 135   1        retc=0; 
+ 136   1        SDA_HIGH;              /*置数据线为输入方式*/
+ 137   1        //GPIO_Init(I2C_GPIO, (GPIO_Pin_TypeDef)(SDA_GION_PIN), GPIO_MODE_IN_FL_NO_IT);
+ 138   1        for(BitCnt=0;BitCnt<8;BitCnt++)
+ 139   1            {
+ 140   2              nopsw;         
+ 141   2              SCL_LOW;        /*置时钟线为低，准备接收数据位*/
+ 142   2           delay_us(10);    /*时钟低电平周期大于4.7μs*/
+ 143   2              SCL_HIGH;        /*置时钟线为高使数据线上数据有效*/
+ 144   2              nopsw;
+ 145   2              nopsw;
+ 146   2              retc=retc<<1;
+ 147   2              if(GET_SDA)retc=retc+1; /*读数据位,接收的数据位放入retc中 */
+ 148   2              nopsw;
+ 149   2              nopsw;
+ 150   2            }
+ 151   1        SCL_LOW;    
+ 152   1        nopsw;
+ 153   1        nopsw;
+ 154   1        //GPIO_Init(I2C_GPIO, (GPIO_Pin_TypeDef)(SDA_GION_PIN), GPIO_MODE_OUT_OD_HIZ_FAST);
+ 155   1        return(retc);
+ 156   1      }
+ 157          
+ 158          /********************************************************************
+ 159                               应答子函数
+ 160          原型:  void Ack_I2c(bit a);
+ 161           
+ 162          功能:主控器进行应答信号,(可以是应答或非应答信号)
+ 163          ********************************************************************/
+ 164          void Ack_I2c(uint8_t a)
+ 165          {
+ 166   1        
+ 167   1        if(a==0)SDA_LOW;         /*在此发出应答或非应答信号 */
+ 168   1              else SDA_HIGH;
+ 169   1        nopsw;
+ 170   1        nopsw;
+ 171   1        nopsw;      
+ 172   1        SCL_HIGH;
+ 173   1        delay_us(10);     /*时钟低电平周期大于4μs*/
+ 174   1        SCL_LOW;                  /*清时钟线，钳住I2C总线以便继续接收*/
+ 175   1        nopsw;
+ 176   1        nopsw; 
+ 177   1      }
+ 178          
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 4   
+
+ 179          /*******************************************************************
+ 180                              向无子地址器件发送字节数据函数               
+ 181          函数原型: bit  ISendByte(uchar sla,ucahr c);  
+ 182          功能:     从启动总线到发送地址，数据，结束总线的全过程,从器件地址sla.
+ 183                     如果返回1表示操作成功，否则操作有误。
+ 184          注意：    使用前必须已结束总线。
+ 185          ********************************************************************/
+ 186          /*
+ 187          uint8_t ISendByte(uint8_t sla,uint8_t c)
+ 188          {
+ 189             Start_I2c();               //启动总线
+ 190             SendByte(sla);             //发送器件地址
+ 191               if(ack==0)return(0);
+ 192             SendByte(c);               //发送数据
+ 193               if(ack==0)return(0);
+ 194            Stop_I2c();                 //结束总线 
+ 195            return(1);
+ 196          }
+ 197          */
+ 198          
+ 199          
+ 200          uint8_t IWritePage( uint8_t WriteAddr, uint8_t* pBuffer,uint8_t NumByteToWrite)
+ 201          {
+ 202   1        
+ 203   1         Start_I2c();               //启动总线
+ 204   1         SendByte(DIAddr);             //发送器件地址
+ 205   1           if(ack==0)return(0);
+ 206   1         SendByte(WriteAddr);               //发送数据
+ 207   1           if(ack==0)return(0);
+ 208   1      
+ 209   1         while (NumByteToWrite>0)
+ 210   1          {   
+ 211   2           SendByte(*pBuffer);            /*发送数据*/
+ 212   2             if(ack==0)
+ 213   2              {
+ 214   3            return(0);
+ 215   3              }
+ 216   2           pBuffer++;
+ 217   2         NumByteToWrite--;
+ 218   2          }  
+ 219   1        Stop_I2c();                 //结束总线 
+ 220   1        delay_ms(50);
+ 221   1        return(1);
+ 222   1      }
+ 223          
+ 224          
+ 225          
+ 226          /*******************************************************************
+ 227                              向有子地址器件发送多字节数据函数               
+ 228          函数原型: bit  ISendStr(uchar sla,uchar suba,ucahr *s,uchar no);  
+ 229          功能:     从启动总线到发送地址，子地址,数据，结束总线的全过程,从器件
+ 230                    地址sla，子地址suba，发送内容是s指向的内容，发送no个字节。
+ 231                     如果返回1表示操作成功，否则操作有误。
+ 232          注意：    使用前必须已结束总线。
+ 233          ********************************************************************/
+ 234          uint8_t ISendStr(uint8_t WriteAddr,uint8_t *s,uint8_t NumByteToWrite)
+ 235          {
+ 236   1        uint8_t NumOfPage = 0;
+ 237   1        uint8_t NumOfSingle = 0;
+ 238   1        uint8_t count = 0;
+ 239   1        uint8_t Adr;
+ 240   1        EEP_LOW;
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 5   
+
+ 241   1        Adr=WriteAddr % I2C_PAGESIZE;
+ 242   1        if (Adr!=0)
+ 243   1        {
+ 244   2        count = (uint8_t)(I2C_PAGESIZE -Adr);
+ 245   2      
+ 246   2        if (IWritePage(WriteAddr,s,count)==0) 
+ 247   2          {
+ 248   3          EEP_HIGH;
+ 249   3          return 0;
+ 250   3          }
+ 251   2        NumByteToWrite-=count;
+ 252   2        WriteAddr+=count;
+ 253   2        s+=count;
+ 254   2        }
+ 255   1      
+ 256   1        NumOfPage =  (uint8_t)(NumByteToWrite / I2C_PAGESIZE);
+ 257   1        NumOfSingle = (uint8_t)(NumByteToWrite % I2C_PAGESIZE);
+ 258   1      
+ 259   1        while(NumOfPage>0)
+ 260   1        {
+ 261   2          if (IWritePage(WriteAddr,s,I2C_PAGESIZE)==0) 
+ 262   2            {
+ 263   3            //GPIO_WriteHigh(EEP_WP_GPIO,(GPIO_Pin_TypeDef)(WP_GION_PIN));
+ 264   3            EEP_HIGH;
+ 265   3            return 0;
+ 266   3            }
+ 267   2          NumByteToWrite-=I2C_PAGESIZE;
+ 268   2          WriteAddr+=I2C_PAGESIZE;
+ 269   2          s+=I2C_PAGESIZE;
+ 270   2          NumOfPage--;
+ 271   2        }
+ 272   1      
+ 273   1        if (NumOfSingle>0) 
+ 274   1        {
+ 275   2        if (IWritePage(WriteAddr,s,NumOfSingle)==0) 
+ 276   2          {
+ 277   3          //GPIO_WriteHigh(EEP_WP_GPIO,(GPIO_Pin_TypeDef)(WP_GION_PIN));
+ 278   3          EEP_HIGH;
+ 279   3          return 0;
+ 280   3          }
+ 281   2        }
+ 282   1        
+ 283   1       //GPIO_WriteHigh(EEP_WP_GPIO,(GPIO_Pin_TypeDef)(WP_GION_PIN)); 
+ 284   1       EEP_HIGH;
+ 285   1       return(1);
+ 286   1      }
+ 287          
+ 288          /*******************************************************************
+ 289                              向无子地址器件读字节数据函数               
+ 290          函数原型: bit  IRcvByte(uchar sla,ucahr *c);  
+ 291          功能:     从启动总线到发送地址，读数据，结束总线的全过程,从器件地
+ 292                    址sla，返回值在c.
+ 293                     如果返回1表示操作成功，否则操作有误。
+ 294          注意：    使用前必须已结束总线。
+ 295          ********************************************************************
+ 296          uint8_t IRcvByte(uint8_t sla,uint8_t *c)
+ 297          {
+ 298             Start_I2c();                //启动总线
+ 299             SendByte(sla+1);            //发送器件地址
+ 300               if(ack==0)return(0);
+ 301             *c=RcvByte();               //读取数据
+ 302               Ack_I2c(1);               //发送非就答位
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 6   
+
+ 303            Stop_I2c();                  //结束总线/ 
+ 304            return(1);
+ 305          }
+ 306          
+ 307          /*******************************************************************
+ 308                              向有子地址器件读取多字节数据函数               
+ 309          函数原型: bit  ISendStr(uchar sla,uchar suba,ucahr *s,uchar no);  
+ 310          功能:     从启动总线到发送地址，子地址,读数据，结束总线的全过程,从器件
+ 311                    地址sla  (0xa0)，子地址suba，读出的内容放入s指向的存储区，读no个字节。
+ 312                     如果返回1表示操作成功，否则操作有误。
+ 313          注意：    使用前必须已结束总线。
+ 314          ********************************************************************/
+ 315          uint8_t IRcvStr(uint8_t ReadAddr,uint8_t *s,uint8_t NumByteToRead)
+ 316          {
+ 317   1         Start_I2c();               /*启动总线*/
+ 318   1         SendByte(DIAddr);             /*发送器件地址*/
+ 319   1           if(ack==0) 
+ 320   1          {
+ 321   2          return(0);
+ 322   2              }
+ 323   1         SendByte(ReadAddr);            /*发送器件子地址*/
+ 324   1           if(ack==0)
+ 325   1          {
+ 326   2          return(0);
+ 327   2            }
+ 328   1      
+ 329   1         Start_I2c();
+ 330   1         SendByte(DIAddr+1);
+ 331   1            if(ack==0)
+ 332   1            {
+ 333   2            return(0);
+ 334   2              }
+ 335   1      
+ 336   1        while (NumByteToRead>1)
+ 337   1          {   
+ 338   2           *s=RcvByte();               /*发送数据*/
+ 339   2            Ack_I2c(0);                /*发送就答位*/  
+ 340   2           s++;
+ 341   2         NumByteToRead--;
+ 342   2          } 
+ 343   1         *s=RcvByte();
+ 344   1          Ack_I2c(1);                  /*发送非应位*/
+ 345   1       Stop_I2c();                     /*结束总线*/ 
+ 346   1        return(1);
+ 347   1      }
+ 348          /***************上面这段程序取自zlgmcu.com********************/
+ 349          
+ 350          
+ 351          
+ 352          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1064    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     25    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+C51 COMPILER V9.56.0.0   AT24C02                                                           09/05/2021 16:55:16 PAGE 7   
+
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

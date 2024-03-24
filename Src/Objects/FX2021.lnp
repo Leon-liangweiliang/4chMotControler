@@ -1,0 +1,9 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj",
+".\Objects\stc8a_it.obj",
+".\Objects\uarttask.obj",
+".\Objects\at24c02.obj",
+".\Objects\SaveConfigFile.obj" 
+TO ".\Objects\FX2021" 
+
+PRINT(".\Listings\FX2021.map")

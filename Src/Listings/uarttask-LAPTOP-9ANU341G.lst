@@ -1,0 +1,341 @@
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/26/2021 18:40:24 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE UARTTASK
+OBJECT MODULE PLACED IN .\Objects\uarttask.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE uarttask.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src) DEBUG
+                    - PRINT(.\Listings\uarttask.lst) TABS(2) OBJECT(.\Objects\uarttask.obj)
+
+line level    source
+
+   1          #include "main.h"
+   2          #include "motor.h"
+   3          #include "uarttask.h"
+   4          
+   5          extern uint8_t RxCounter1,ReadCounter1;
+   6          extern uint8_t RxBuffer1[RxBufferSize1];
+   7          extern uint8_t RxByteSize;
+   8          extern bit busy;
+   9          
+  10          
+  11          void ClearMemory(uint8_t * ptr,uint8_t len)
+  12          {
+  13   1        uint8_t i;
+  14   1         for (i=0;i<len;i++)  
+  15   1          {
+  16   2          *ptr=0;
+  17   2          ptr++;
+  18   2          }
+  19   1      }
+  20          
+  21          void Uart2Init(void)    //115200bps@22.1184MHz
+  22          {
+  23   1          S2CON = 0x10;
+  24   1          T2L = 0xd0;                                 //65536-22118400/115200/4=0FFD0H
+  25   1          T2H = 0xff;
+  26   1          AUXR = 0x14;                                //?????
+  27   1      
+  28   1          IE2 |= 1;                                  //??????
+  29   1        ClearUart2Buffer();
+  30   1      }
+  31          
+  32          void ClearUart2Buffer(void)
+  33          {
+  34   1        ClearMemory(RxBuffer1,RxBufferSize1);
+  35   1        RxByteSize=0;
+  36   1        RxCounter1=0;
+  37   1        ReadCounter1=0;
+  38   1        busy = 0;
+  39   1      }
+  40          
+  41          /*
+  42          
+  43          uint8_t CompString(uint8_t *str1,uint8_t *str2,uint8_t len)
+  44          {
+  45            while (len>0)
+  46            {
+  47              if ((*str1)!=(*str2)) return 0;
+  48              len--;
+  49              str1++;
+  50              str2++;
+  51            }
+  52            return 1;
+  53          }
+  54          
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/26/2021 18:40:24 PAGE 2   
+
+  55          int32_t String2Number(uint8_t *str1)
+  56          {
+  57             int32_t ttm=0;
+  58             int8_t zf=1;
+  59            while (1)
+  60            {
+  61              if ((*str1)>='0' && (*str1)<='9')
+  62                {
+  63                ttm=ttm*10+(*str1)-'0';
+  64                }
+  65              else if ((*str1)=='-')
+  66                {
+  67                 zf=-1;
+  68                }
+  69              else break;
+  70              str1++;
+  71            }
+  72            return zf*ttm;
+  73          }
+  74          */
+  75          void SendToLcd(UARTST_PKG * sendpkg)
+  76          {
+  77   1        uint8_t i;
+  78   1         /* Wait until end of transmit */
+  79   1        
+  80   1             //while (UART2_GetFlagStatus(UART2_FLAG_TXE) == RESET);
+  81   1              //UART2_SendData8(0XA5);
+  82   1              while (busy);
+  83   1            busy = 1;
+  84   1            S2BUF = 0X5A;
+  85   1          //while (UART2_GetFlagStatus(UART2_FLAG_TXE) == RESET);
+  86   1              //UART2_SendData8(0X5A);
+  87   1              while (busy);
+  88   1            busy = 1;
+  89   1            S2BUF = 0XA5;
+  90   1          //while (UART2_GetFlagStatus(UART2_FLAG_TXE) == RESET);
+  91   1              //UART2_SendData8(sendpkg->pklen);
+  92   1              while (busy);
+  93   1            busy = 1;
+  94   1            S2BUF = sendpkg->pklen;
+  95   1          //while (UART2_GetFlagStatus(UART2_FLAG_TXE) == RESET);
+  96   1              //UART2_SendData8(sendpkg->cmd);
+  97   1              while (busy);
+  98   1            busy = 1;
+  99   1            S2BUF = sendpkg->cmd;
+ 100   1          for (i=0;i<(sendpkg->pklen-1);i++)
+ 101   1            {
+ 102   2            //while (UART2_GetFlagStatus(UART2_FLAG_TXE) == RESET);
+ 103   2                //UART2_SendData8(sendpkg->Uart1RunBuf[i]);
+ 104   2                while (busy);
+ 105   2              busy = 1;
+ 106   2              S2BUF = sendpkg->Uart1RunBuf[i];
+ 107   2            }
+ 108   1      }
+ 109          
+ 110          
+ 111          void SendPowerLevel1(uint8_t pl)
+ 112          {
+ 113   1        
+ 114   1        UARTST_PKG sendpkg;
+ 115   1        sendpkg.pklen=5;
+ 116   1        sendpkg.cmd=0x82;
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/26/2021 18:40:24 PAGE 3   
+
+ 117   1        sendpkg.Uart1RunBuf[0]=0x10;  //Addr_h
+ 118   1        sendpkg.Uart1RunBuf[1]=0x10;  //Addr_l
+ 119   1        sendpkg.Uart1RunBuf[2]=0x00;  //data1
+ 120   1        sendpkg.Uart1RunBuf[3]=pl;  //data2
+ 121   1        SendToLcd(&sendpkg);
+ 122   1        
+ 123   1        
+ 124   1        //Cutpicute(0x0200,10+pl,525,527,780,656,525,527);
+ 125   1      }
+ 126          
+ 127          
+ 128          void SendPowerLevel2(uint8_t pl)
+ 129          {
+ 130   1      
+ 131   1        UARTST_PKG sendpkg;
+ 132   1        sendpkg.pklen=5;
+ 133   1        sendpkg.cmd=0x82;
+ 134   1        sendpkg.Uart1RunBuf[0]=0x10;  //Addr_h
+ 135   1        sendpkg.Uart1RunBuf[1]=0x10;  //Addr_l
+ 136   1        sendpkg.Uart1RunBuf[2]=0x00;  //data1
+ 137   1        sendpkg.Uart1RunBuf[3]=pl;  //data2
+ 138   1        SendToLcd(&sendpkg);
+ 139   1        //Cutpicute(0x0600,10+pl,129,333,383,470,129,333);
+ 140   1      }
+ 141          
+ 142          
+ 143          void UpdateLcdTime(uint8_t vminute,u8 vsecond)
+ 144          {
+ 145   1        UARTST_PKG sendpkg;
+ 146   1        sendpkg.pklen=11;
+ 147   1        sendpkg.cmd=0x82;
+ 148   1        sendpkg.Uart1RunBuf[0]=0x10;  //Addr_h
+ 149   1        sendpkg.Uart1RunBuf[1]=0x31;  //Addr_l
+ 150   1        sendpkg.Uart1RunBuf[2]=0x00;  //data1
+ 151   1        sendpkg.Uart1RunBuf[3]=(uint8_t)(vminute/10); //data1
+ 152   1        sendpkg.Uart1RunBuf[4]=0x00;  //data2
+ 153   1        sendpkg.Uart1RunBuf[5]=(uint8_t)(vminute%10); //data2
+ 154   1        sendpkg.Uart1RunBuf[6]=0x00;  //data3
+ 155   1        sendpkg.Uart1RunBuf[7]=(uint8_t)(vsecond/10); //data3
+ 156   1        sendpkg.Uart1RunBuf[8]=0x00;  //data4
+ 157   1        sendpkg.Uart1RunBuf[9]=(uint8_t)(vsecond%10); //data4
+ 158   1        SendToLcd(&sendpkg);
+ 159   1      }
+ 160          
+ 161            
+ 162          
+ 163          void UpdateLcdSetTime(uint8_t vminute)
+ 164          {
+ 165   1        UARTST_PKG sendpkg;
+ 166   1        sendpkg.pklen=11;
+ 167   1        sendpkg.cmd=0x82;
+ 168   1        sendpkg.Uart1RunBuf[0]=0x10;  //Addr_h
+ 169   1        sendpkg.Uart1RunBuf[1]=0x35;  //Addr_l
+ 170   1        sendpkg.Uart1RunBuf[2]=0x00;  //data1
+ 171   1        sendpkg.Uart1RunBuf[3]=(uint8_t)(vminute/10); //data1
+ 172   1        sendpkg.Uart1RunBuf[4]=0x00;  //data2
+ 173   1        sendpkg.Uart1RunBuf[5]=(uint8_t)(vminute%10); //data2
+ 174   1        sendpkg.Uart1RunBuf[6]=0x00;  //data3
+ 175   1        sendpkg.Uart1RunBuf[7]=0; //data3
+ 176   1        sendpkg.Uart1RunBuf[8]=0x00;  //data4
+ 177   1        sendpkg.Uart1RunBuf[9]=0; //data4
+ 178   1        SendToLcd(&sendpkg);
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/26/2021 18:40:24 PAGE 4   
+
+ 179   1      }
+ 180          
+ 181          
+ 182          
+ 183          void SetAddressValue(uint16_t add,uint16_t va)
+ 184          {
+ 185   1        UARTST_PKG sendpkg;
+ 186   1        sendpkg.pklen=0x05;
+ 187   1        sendpkg.cmd=0x82;
+ 188   1        sendpkg.Uart1RunBuf[0]=add>>8;  //Addr_h
+ 189   1        sendpkg.Uart1RunBuf[1]=add&0xff;  //Addr_l
+ 190   1        sendpkg.Uart1RunBuf[2]=va>>8; //data1
+ 191   1        sendpkg.Uart1RunBuf[3]=va&0xff; //data1
+ 192   1        SendToLcd(&sendpkg);
+ 193   1      }
+ 194          /*
+ 195          void ChangeDispId(uint16_t picid)
+ 196          {
+ 197            UARTST_PKG sendpkg;
+ 198            sendpkg.pklen=0x07;
+ 199            sendpkg.cmd=0x82;
+ 200            sendpkg.Uart1RunBuf[0]=0x00;  //Addr
+ 201            sendpkg.Uart1RunBuf[1]=0x84;  //Addr
+ 202            sendpkg.Uart1RunBuf[2]=0x5A;  //Addr
+ 203            sendpkg.Uart1RunBuf[3]=0x1;  //Addr
+ 204            sendpkg.Uart1RunBuf[4]=picid>>8;  //data0
+ 205            sendpkg.Uart1RunBuf[5]=picid&0xff;  //data1
+ 206            SendToLcd(&sendpkg);
+ 207          }
+ 208          */
+ 209          
+ 210          void ChangeDispId(uint16_t picid)
+ 211          {
+ 212   1        UARTST_PKG sendpkg;
+ 213   1        sendpkg.pklen=0x04;
+ 214   1        sendpkg.cmd=0x80;
+ 215   1        sendpkg.Uart1RunBuf[0]=0x03;  //Addr
+ 216   1        sendpkg.Uart1RunBuf[1]=picid>>8;  //data0
+ 217   1        sendpkg.Uart1RunBuf[2]=picid&0xff;  //data1
+ 218   1        SendToLcd(&sendpkg);
+ 219   1      }
+ 220          
+ 221          
+ 222          
+ 223          void SetSeqAddressValue(uint16_t add,uint8_t* va,uint8_t num)
+ 224          {
+ 225   1        UARTST_PKG sendpkg;
+ 226   1        uint8_t i;
+ 227   1        if ((num%2)!=0) 
+ 228   1          sendpkg.pklen=6+num;
+ 229   1        else 
+ 230   1          sendpkg.pklen=5+num;
+ 231   1        
+ 232   1        sendpkg.cmd=0x82;
+ 233   1        sendpkg.Uart1RunBuf[0]=add>>8;  //Addr_h
+ 234   1        sendpkg.Uart1RunBuf[1]=add&0xff;  //Addr_l
+ 235   1        for (i=0;i<num;i++)
+ 236   1          {
+ 237   2          sendpkg.Uart1RunBuf[2+i]=(*va); //data
+ 238   2          va++;
+ 239   2          }
+ 240   1        if ((num%2)!=0)
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/26/2021 18:40:24 PAGE 5   
+
+ 241   1          {
+ 242   2          sendpkg.Uart1RunBuf[2+num]=0; //data
+ 243   2          sendpkg.Uart1RunBuf[3+num]=0xff;  //data
+ 244   2          sendpkg.Uart1RunBuf[4+num]=0xff;  //data
+ 245   2          }
+ 246   1        else
+ 247   1          {
+ 248   2          sendpkg.Uart1RunBuf[2+num]=0xff;  //data
+ 249   2          sendpkg.Uart1RunBuf[3+num]=0xff;  //data
+ 250   2          }
+ 251   1        SendToLcd(&sendpkg);
+ 252   1      }
+ 253          
+ 254          /*
+ 255          void Cutpicute(uint16_t addr,uint16_t cupPID, uint16_t x_org_lu,uint16_t y_org_lu,uint16_t x_org_rd,uint16
+             -_t y_org_rd,uint16_t x_pas_lu,uint16_t y_pas_lu)
+ 256          //void Cutpicute(void)
+ 257          
+ 258          {
+ 259            UARTST_PKG sendpkg;
+ 260            //uint8_t i;
+ 261          
+ 262            sendpkg.pklen=22;
+ 263            sendpkg.cmd=0x82;
+ 264            sendpkg.Uart1RunBuf[0]=addr>>8;  //Addr_h
+ 265            sendpkg.Uart1RunBuf[1]=addr&0xff; //Addr_l
+ 266            sendpkg.Uart1RunBuf[2]=0;
+ 267            sendpkg.Uart1RunBuf[3]=6;
+ 268            sendpkg.Uart1RunBuf[4]=0;
+ 269            sendpkg.Uart1RunBuf[5]=0;
+ 270            
+ 271            sendpkg.Uart1RunBuf[6]=cupPID>>8;
+ 272            sendpkg.Uart1RunBuf[7]=cupPID&0xff;
+ 273            //Ô¤ÇÐ×óÉÏ½Ç X
+ 274            sendpkg.Uart1RunBuf[8]=x_org_lu>>8;  //locaiton
+ 275            sendpkg.Uart1RunBuf[9]=x_org_lu&0xff; //locaiton
+ 276            //Ô¤ÇÐ×óÉÏ½Ç Y
+ 277            sendpkg.Uart1RunBuf[10]=y_org_lu>>8;  //locaiton
+ 278            sendpkg.Uart1RunBuf[11]=y_org_lu&0xff;  //locaiton
+ 279            
+ 280            //Ô¤ÇÐÓÒÏÂ½Ç X
+ 281            sendpkg.Uart1RunBuf[12]=x_org_rd>>8;  //locaiton
+ 282            sendpkg.Uart1RunBuf[13]=x_org_rd&0xff;  //locaiton
+ 283            //Ô¤ÇÐÓÒÏÂ½Ç Y
+ 284            sendpkg.Uart1RunBuf[14]=y_org_rd>>8;  //locaiton
+ 285            sendpkg.Uart1RunBuf[15]=y_org_rd&0xff;  //locaiton
+ 286          
+ 287            //Õ³Ìù×óÉÏ½Ç X
+ 288            sendpkg.Uart1RunBuf[16]=x_pas_lu>>8;  //locaiton
+ 289            sendpkg.Uart1RunBuf[17]=x_pas_lu&0xff;  //locaiton
+ 290            //Õ³Ìù×óÉÏ½Ç Y
+ 291            sendpkg.Uart1RunBuf[18]=y_pas_lu>>8;  //locaiton
+ 292            sendpkg.Uart1RunBuf[19]=y_pas_lu&0xff;  //locaiton
+ 293          
+ 294            sendpkg.Uart1RunBuf[20]=0xff;
+ 295          
+ 296            SendToLcd(&sendpkg);
+ 297          }
+ 298          */
+ 299          
+ 300          
+ 301          
+C51 COMPILER V9.56.0.0   UARTTASK                                                          01/26/2021 18:40:24 PAGE 6   
+
+ 302          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1029    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    216    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

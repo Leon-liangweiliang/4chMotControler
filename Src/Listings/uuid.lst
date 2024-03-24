@@ -1,0 +1,282 @@
+C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE UUID
+OBJECT MODULE PLACED IN .\Objects\uuid.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE uuid.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD) DEB
+                    -UG PRINT(.\Listings\uuid.lst) TABS(2) OBJECT(.\Objects\uuid.obj)
+
+line level    source
+
+   1          #include "main.h"
+   2          #include "uuid.h"
+   3          
+   4          #define UID_WRITE_FLASHADDRESS        0x7123   //ÉÕÐ´Æ÷·ÅÖÃµÄµØÖ·
+   5          #define UID_ROM_ADDR          0x7ff9
+   6          
+   7          
+   8          #define PWDXORBYTE  55
+   9          #define LEFTMOVBIT  1
+  10          #define ADDBYTE  33
+  11          #define RIGHTMOVBIT  1
+  12          
+  13          uint8_t UUDIERROR=0;
+  14          uint8_t STC8A_ID[7];
+  15          
+  16          
+  17          
+  18          //Get STM8S Unique ID
+  19          
+  20          void Get_STC8A_UniqueID(void)
+  21          { 
+  22   1          uint8_t i=0;
+  23   1        char *ID;
+  24   1         ID = (char idata *)0xf1;
+  25   1          for(i=0; i<7; i++) 
+  26   1              STC8A_ID[i] = ID[i]; 
+  27   1      } 
+  28          
+  29          /*
+  30          void SaveUID2DataFlash(void)
+  31          {
+  32          
+  33            u8 i,j; 
+  34            for (i=0;i<12;i+=2)
+  35              {
+  36              for (j=0;j<2;j++)
+  37                {
+  38                DATAFLSH_ID[i+j]=STM8S_ID[i+j]^DATAEEPPWD[j];
+  39                FLASH_ProgramByte(UID_WRITE_FLASHADDRESS+i+j, DATAFLSH_ID[i+j]);
+  40                 Wait until End of high voltage flag is set
+  41                  while (FLASH_GetFlagStatus(FLASH_FLAG_HVOFF) == RESET);
+  42                }
+  43              }
+  44          }
+  45          */
+  46          
+  47          
+  48          uint8_t CmpDataFlashUuid(void)
+  49          {
+  50   1        uint8_t i;
+  51   1        uint8_t * IDWrFlash;
+  52   1        uint8_t tempv;
+  53   1        Get_STC8A_UniqueID();
+  54   1        IDWrFlash=(uint8_t code *) UID_WRITE_FLASHADDRESS;
+C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 2   
+
+  55   1        for (i=0;i<7;i++)
+  56   1          {
+  57   2            tempv=(STC8A_ID[i]^PWDXORBYTE);
+  58   2            tempv=tempv<<LEFTMOVBIT;
+  59   2            tempv=tempv+ADDBYTE;
+  60   2            tempv=tempv>>RIGHTMOVBIT;
+  61   2            
+  62   2          if (IDWrFlash[i]!=tempv)
+  63   2            {
+  64   3            UUDIERROR=1;
+  65   3            return 0;
+  66   3            }
+  67   2          }
+  68   1        UUDIERROR=0;
+  69   1        return 1;
+  70   1      }
+  71          
+  72          
+  73          #if 0
+              void SaveUID2AT24C02(void)
+              {
+                u8 i,j;
+                for (i=0;i<12;i+=4)
+                  {
+                  for (j=0;j<4;j++)
+                  EEP_ID[i+j]=STM8S_ID[i+j]^AT24EEPPWD[j];
+                  }
+                
+                ISendStr( UID_WRITE_EEPADDRESS, EEP_ID,12); 
+              }
+              
+              u8 Cmp24c02Flash(void)
+              {
+                u8 i,j;
+                IRcvStr( UID_WRITE_EEPADDRESS, EEP_ID,12);
+                
+                for (i=0;i<12;i+=4)
+                  {
+                  for (j=0;j<4;j++)
+                    {
+                    if (EEP_ID[i+j]!=(STM8S_ID[i+j]^AT24EEPPWD[j])) return 0;
+                    }
+                  }
+                return 1;
+              }
+              
+              #define ERRORUSETIMES 20
+              
+              u8 GetDownCounter(void)
+              {
+                u8 losttemp=ERRORUSETIMES;
+                if (Cmp24c02Flash()==0)
+                  {
+                  AT24UUDIERROR=1;
+                  losttemp=FLASH_ReadByte(UID_WRITE_FLASHADDRESS+123);
+                  if (losttemp>ERRORUSETIMES) losttemp=ERRORUSETIMES;
+                  else if (losttemp>0) losttemp--;
+                  FLASH_ProgramByte(UID_WRITE_FLASHADDRESS+123, losttemp);
+                  /* Wait until End of high voltage flag is set*/
+                  while (FLASH_GetFlagStatus(FLASH_FLAG_HVOFF) == RESET);
+                  }
+                else 
+C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 3   
+
+                  { 
+                  if (FLASH_ReadByte(UID_WRITE_FLASHADDRESS+123)!=ERRORUSETIMES)
+                    {
+                    losttemp=ERRORUSETIMES;
+                    FLASH_ProgramByte(UID_WRITE_FLASHADDRESS+123, losttemp);
+                    /* Wait until End of high voltage flag is set*/
+                    while (FLASH_GetFlagStatus(FLASH_FLAG_HVOFF) == RESET);
+                    }
+                  }
+                return losttemp;
+              }
+              
+              
+              
+              
+              void CaculatedAuthorizationCode(u8 *Startdate,u8* FinishDate,u8* ACode)
+              {
+                u16 UseDates=0;
+                u8 UseDateNum[3];
+                u16 SYear,FYear;
+                u8 SMonth,SDate,FMonth,FDate;
+                SYear=(Startdate[0]-'0')*1000;
+                SYear+=(Startdate[1]-'0')*100;
+                SYear+=(Startdate[2]-'0')*10;
+                SYear+=(Startdate[3]-'0');
+                
+                SMonth=(Startdate[5]-'0')*10;
+                SMonth+=(Startdate[6]-'0');
+              
+                SDate=(Startdate[8]-'0')*10;
+                SDate+=(Startdate[9]-'0');
+              
+                FYear=(FinishDate[0]-'0')*1000;
+                FYear+=(FinishDate[1]-'0')*100;
+                FYear+=(FinishDate[2]-'0')*10;
+                FYear+=(FinishDate[3]-'0');
+              
+              
+                FMonth=(FinishDate[5]-'0')*10;
+                FMonth+=(FinishDate[6]-'0');
+              
+                FDate=(FinishDate[8]-'0')*10;
+                FDate+=(FinishDate[9]-'0');
+              
+                while (SYear<FYear)
+                {
+                  while (SMonth<=12)
+                  {
+                    if (SMonth==2 )
+                    {
+                      if (SYear%4==0) UseDates+=(29-SDate)+1; else  UseDates+=(28-SDate)+1;
+                      
+                    }
+                    else if (SMonth==1|| SMonth==3 || SMonth==5 || SMonth==7 ||SMonth==8 ||SMonth==10 || SMonth==12)
+                    {
+                      UseDates+=(31-SDate)+1;
+                    }
+                    else 
+                    {
+                      UseDates+=(30-SDate)+1;
+                    }
+                    SMonth++;
+C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 4   
+
+                    SDate=1;
+                  }
+                  SMonth=1;
+                  SYear++;
+                }
+              
+                while (SMonth<FMonth)
+                  {
+                    if (SMonth==2 )
+                    {
+                      if (SYear%4==0) UseDates+=(29-SDate)+1; else  UseDates+=(28-SDate)+1;
+                      
+                    }
+                    else if (SMonth==1|| SMonth==3 || SMonth==5 || SMonth==7 ||SMonth==8 ||SMonth==10 || SMonth==12)
+                    {
+                      UseDates+=(31-SDate)+1;
+                    }
+                    else 
+                    {
+                      UseDates+=(30-SDate)+1;
+                    }
+                    SMonth++;
+                    SDate=1;
+                  }
+                
+                UseDates+=(FDate-SDate)+1;
+              
+                UseDateNum[0]=UseDates/100%10;
+                UseDateNum[1]=UseDates/10%10;
+                UseDateNum[2]=UseDates%10;
+              
+                ACode[0]=((Startdate[0]-'0') ^ 7)+'0';
+                ACode[1]=((Startdate[1]-'0') ^ UseDateNum[2])+'0';
+                ACode[2]=((Startdate[2]-'0') ^ UseDateNum[1])+'0';
+                ACode[3]=((Startdate[3]-'0') ^ UseDateNum[0])+'0';
+                ACode[4]=((Startdate[5]-'0') ^ (Startdate[9]-'0')) +'0' ;
+                ACode[5]=((Startdate[6]-'0') ^ (Startdate[8]-'0')) +'0';
+                
+              }
+              
+              u8 CmpFinishDate(u8 *FinishDate , u8* NowDate)
+              {
+                u16 FYear,NYear;
+                u8 FMonth,FDate,NMonth,NDate;
+              
+                FYear=(FinishDate[0]-'0')*1000;
+                FYear+=(FinishDate[1]-'0')*100;
+                FYear+=(FinishDate[2]-'0')*10;
+                FYear+=(FinishDate[3]-'0');
+              
+              
+                FMonth=(FinishDate[5]-'0')*10;
+                FMonth+=(FinishDate[6]-'0');
+              
+                FDate=(FinishDate[8]-'0')*10;
+                FDate+=(FinishDate[9]-'0');
+              
+                NYear=2000+ NowDate[0];
+                NMonth=NowDate[1];
+                NDate=NowDate[2];
+              
+                if (NYear>FYear)  return 0;
+C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 5   
+
+                if ((FYear==NYear) && (NMonth>FMonth)) return 0;
+                if ((FYear==NYear) && (FMonth==NMonth) && (NDate>FDate)) return 0;
+                return 1;
+              }
+              #endif
+ 246          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    225    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     17    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,84 @@
+C51 COMPILER V9.56.0.0   SAVECONFIGFILE                                                    07/07/2023 23:29:01 PAGE 1   
+
+
+C51 COMPILER V9.56.0.0, COMPILATION OF MODULE SAVECONFIGFILE
+OBJECT MODULE PLACED IN .\Objects\SaveConfigFile.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE SaveConfigFile.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;
+                    -.\LCD) DEBUG PRINT(.\Listings\SaveConfigFile.lst) TABS(2) OBJECT(.\Objects\SaveConfigFile.obj)
+
+line level    source
+
+   1          #include "main.h"
+   2          #include "eeprom.h"
+   3          #include "SaveConfigfile.h"
+   4          
+   5          //SAVEEEPROMACODE SaveeepromCode;
+   6          //SAVEEEPROMDATA SaveeepromData;
+   7          SAVEDATAPARAMS SaveLedData0;
+   8          //LEDUSEDTIMES ledusedtimes;
+   9          
+  10          
+  11          
+  12          void ResetSaveData(void)
+  13          {
+  14   1        SaveLedData0.Saveed=1;
+  15   1        SaveLedData0.LedOnOff=0;
+  16   1        SaveLedData0.LedALLChanels=4;
+  17   1        SaveLedData0.DriverType=1;
+  18   1        SaveLedData0.LedPower[0]=1;
+  19   1        SaveLedData0.LedPower[1]=1;
+  20   1        SaveLedData0.LedPower[2]=1;
+  21   1        SaveLedData0.LedPower[3]=1;
+  22   1        SaveLedData0.LedPower[4]=1;
+  23   1        SaveLedData0.SelectedLedChanel=1;
+  24   1        SaveLedData0.LEDMotorLocation[0]=0;
+  25   1        SaveLedData0.LEDMotorLocation[1]=0;
+  26   1        SaveLedData0.LEDMotorLocation[2]=25;
+  27   1        SaveLedData0.LEDMotorLocation[3]=50;
+  28   1        SaveLedData0.LEDMotorLocation[4]=75;
+  29   1        SaveLedData0.MotorStepPluses=90;
+  30   1        SaveLedData0.DriverFanOnOff=1;
+  31   1      }
+  32          
+  33          
+  34          void WriteEEpromSaveData(void)
+  35          {
+  36   1        IapErase(0);
+  37   1        IapProgramArea(0,(u8*)(&SaveLedData0),sizeof(SAVEDATAPARAMS));
+  38   1      }
+  39          
+  40          void ReadEEpromSaveData(void)
+  41          {
+  42   1        IapReadArea(0, (u8*)(&SaveLedData0), sizeof(SAVEDATAPARAMS));
+  43   1      
+  44   1        if (SaveLedData0.SelectedLedChanel>5 ||
+  45   1          SaveLedData0.LedOnOff>1   ||
+  46   1          SaveLedData0.DriverType>1 ||
+  47   1          SaveLedData0.DriverFanOnOff>1)
+  48   1          {
+  49   2          ResetSaveData();
+  50   2          WriteEEpromSaveData();
+  51   2          }
+  52   1      }
+  53          
+  54          
+C51 COMPILER V9.56.0.0   SAVECONFIGFILE                                                    07/07/2023 23:29:01 PAGE 2   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    203    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     17    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+   EDATA SIZE       =   ----    ----
+   HDATA SIZE       =   ----    ----
+   XDATA CONST SIZE =   ----    ----
+   FAR CONST SIZE   =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

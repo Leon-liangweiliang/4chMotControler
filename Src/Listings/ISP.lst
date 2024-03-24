@@ -1,0 +1,35 @@
+A51 MACRO ASSEMBLER  ISP                                                                  09/09/2021 21:05:23 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.2.5.0
+OBJECT MODULE PLACED IN .\Objects\ISP.obj
+ASSEMBLER INVOKED BY: D:\Keil_v5\C51\BIN\A51.EXE ISP.asm SET(LARGE) DEBUG PRINT(.\Listings\ISP.lst) OBJECT(.\Objects\ISP
+                      .obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+----                   1     CSEG AT 0143H ;P3 口中断入口地址
+
+0143 8000              2      JMP P3INT_ISR
+
+0145                   3     P3INT_ISR:
+
+0145 016B              4      JMP 006BH ;借用 13 号中断的入口地址
+
+                       5      END
+
+A51 MACRO ASSEMBLER  ISP                                                                  09/09/2021 21:05:23 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+P3INT_ISR. . . . .  C ADDR   0145H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)
