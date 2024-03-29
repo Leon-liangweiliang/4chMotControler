@@ -41,8 +41,9 @@ void UpdateLcdPowerDisplay(u8 chN, u8 Power,u8 onoff);
 void DisplaySetting(void);
 void DispSettingRectangle(void);
 void DispSettingNumber(u8 location,u8 numberv);
+void DisplaySetting1(void);
 void DisplaySetting2(void);
-
+void DisplaySetting3(void);
 
 
 

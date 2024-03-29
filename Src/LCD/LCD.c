@@ -511,7 +511,7 @@ void UpdateLCDLEDSelected(u8 chN, u8 Selected)
 	else LCD_DrawRectangle(Rx-7,RWh-1,Rx+27,RWh+16,BACKGROUNDCOLOR);
 }
 
-void UpdateLCDLEDCloum(u8 chN, u8 Power, u8 onoff)
+void UpdateLCDLEDCloum(u8 chN, u8 Power, u8 onoff)//Ñ¡ÔñÍ¨µÀ
 {
 	u8 Rw=18,Rh=100;
 	u8 Rx,Ry=5;
@@ -690,18 +690,26 @@ void DisplaySetting(void)
 	
 	Display_ASCII8X16(8,108,"LED4 Lot:",9,BLACK);
 	DispSettingNumber(7,SaveLedData0.LEDMotorLocation[4]);
-
-	
 }
 
-void DisplaySetting2(void)
+void DisplaySetting1(void)
 {
-
 	LCD_DISPiD=8;
 	LCD_Clear(BACKGROUNDCOLOR);
 	Display_ASCII8X16(8,8,"Driver Fan:",11,BLACK);
 	DispSettingNumber(2,SaveLedData0.DriverFanOnOff);
 	LCD_DrawRectangle(95,7,126,25,BLACK);
+	
+	Display_ASCII8X16(8,28,"Purplelamp:",11,BLACK);
+	DispSettingNumber(3,SaveLedData0.PurpleLamp);
+}
+
+void DisplaySetting2(void)
+{
+	LCD_DISPiD=9;		
+	LCD_DrawRectangle(95,7+(3-3)*20,126,25+(3-3)*20,BACKGROUNDCOLOR);
+	LCD_DrawRectangle(95,7+(3-2)*20,126,25+(3-2)*20,BLACK);	
+	
 }
 
 

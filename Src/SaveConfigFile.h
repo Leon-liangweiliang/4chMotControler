@@ -10,6 +10,7 @@ typedef struct {
 	u8 LedLocation[5];   //0X18---0X1c
 	u8 MotorStepPluse;
 	u8 DriverFanOnOff;
+	u8 PurpleLamp;
 }Run_PARAMS;
 
 
@@ -24,6 +25,7 @@ typedef struct {
 	u8 MotorStepPluses;
 	u8 DriverFanOnOff;
 	u8 LedALLChanels;
+	u8 PurpleLamp;
 }SAVEDATAPARAMS;
 
 

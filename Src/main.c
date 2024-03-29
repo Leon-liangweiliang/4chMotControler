@@ -65,7 +65,7 @@ u8 SelectChDelayCounter=0;
 u8 AutoOnLedCh=0;
 u8 MovetoOtherLedch=0;
 
-void delay_us(uint16_t dt)
+void delay_us(uint16_t dt) 
 {
 	dt = dt<<1;
 	while (--dt) WDTRST;
@@ -261,13 +261,25 @@ void Time0OutDelaySub(void)
 		}
 	
 
-	if ((LCD_DISPiD==1) && (SaveLedData0.LedOnOff==0) && (MovetoOtherLedch==1)) SelectChDelayCounter++;
-	if (SelectChDelayCounter>75)  
-	{
+	if ((LCD_DISPiD==1) && (SaveLedData0.LedOnOff==0) && (MovetoOtherLedch==1)) SelectChDelayCounter++;//自动
+		if(SaveLedData0.SelectedLedChanel==1&&SaveLedData0.PurpleLamp==0)
+		{
+	  if (SelectChDelayCounter>75)  
+	  {
+		SelectChDelayCounter=0;
+		AutoOnLedCh=0;
+		MovetoOtherLedch=0;
+	   }
+    }
+		else
+		{
+		if (SelectChDelayCounter>75)  
+	  {
 		SelectChDelayCounter=0;
 		AutoOnLedCh=1;
 		MovetoOtherLedch=0;
-	}
+	   }
+		}
 	
 
 	LedShareCounter++;
@@ -523,7 +535,7 @@ static u8 ReadBytest=0;
 		WriteEEpromSaveData();
 		}
 
-	if (AutoOnLedCh )
+	if (AutoOnLedCh)//自动
 	{
 		AutoOnLedCh=0;
 		if (LCD_DISPiD==1 && SaveLedData0.LedOnOff==0)
@@ -708,6 +720,14 @@ void CheckButton(void)
 				DispSettingNumber(2,1);
 				WriteDriverAddressValue(0X1e,1);
 			}
+			
+			 else if (LCD_DISPiD==9)
+			{
+				SaveLedData0.PurpleLamp=1;
+				DispSettingNumber(3,1);
+				WriteDriverAddressValue(0X20,1);
+			}
+			
 		}
 
 	}
@@ -777,6 +797,14 @@ void CheckButton(void)
 				DispSettingNumber(2,0);
 				WriteDriverAddressValue(0X1e,0);
 			}
+			
+				else if (LCD_DISPiD==9)
+			{
+				SaveLedData0.PurpleLamp=0;
+				DispSettingNumber(3,0);
+				WriteDriverAddressValue(0X20,0);
+			}
+			
 		}
 	}
 
@@ -819,7 +847,11 @@ void CheckButton(void)
 						}
 					else if (LCD_DISPiD==8) //driver fan onoff
 						{
-						DisplaySetting2();
+						  DisplaySetting1();							
+						}
+						else if(LCD_DISPiD==9)
+						{
+							DisplaySetting2();
 						}
 					else 
 						{

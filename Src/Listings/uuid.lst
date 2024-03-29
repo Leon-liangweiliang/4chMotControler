@@ -1,9 +1,9 @@
-C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 1   
+C51 COMPILER V9.59.0.0   UUID                                                              03/30/2024 01:43:47 PAGE 1   
 
 
-C51 COMPILER V9.56.0.0, COMPILATION OF MODULE UUID
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE UUID
 OBJECT MODULE PLACED IN .\Objects\uuid.obj
-COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE uuid.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD) DEB
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE uuid.c LARGE OMF2 OPTIMIZE(0,SIZE) BROWSE ORDER INCDIR(..\Src;.\LCD) DEB
                     -UG PRINT(.\Listings\uuid.lst) TABS(2) OBJECT(.\Objects\uuid.obj)
 
 line level    source
@@ -62,7 +62,7 @@ line level    source
   52   1        uint8_t tempv;
   53   1        Get_STC8A_UniqueID();
   54   1        IDWrFlash=(uint8_t code *) UID_WRITE_FLASHADDRESS;
-C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 2   
+C51 COMPILER V9.59.0.0   UUID                                                              03/30/2024 01:43:47 PAGE 2   
 
   55   1        for (i=0;i<7;i++)
   56   1          {
@@ -126,7 +126,7 @@ line level    source
                   while (FLASH_GetFlagStatus(FLASH_FLAG_HVOFF) == RESET);
                   }
                 else 
-C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 3   
+C51 COMPILER V9.59.0.0   UUID                                                              03/30/2024 01:43:47 PAGE 3   
 
                   { 
                   if (FLASH_ReadByte(UID_WRITE_FLASHADDRESS+123)!=ERRORUSETIMES)
@@ -190,7 +190,7 @@ line level    source
                       UseDates+=(30-SDate)+1;
                     }
                     SMonth++;
-C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 4   
+C51 COMPILER V9.59.0.0   UUID                                                              03/30/2024 01:43:47 PAGE 4   
 
                     SDate=1;
                   }
@@ -254,7 +254,7 @@ line level    source
                 NDate=NowDate[2];
               
                 if (NYear>FYear)  return 0;
-C51 COMPILER V9.56.0.0   UUID                                                              01/29/2023 22:43:41 PAGE 5   
+C51 COMPILER V9.59.0.0   UUID                                                              03/30/2024 01:43:47 PAGE 5   
 
                 if ((FYear==NYear) && (NMonth>FMonth)) return 0;
                 if ((FYear==NYear) && (FMonth==NMonth) && (NDate>FDate)) return 0;
@@ -265,7 +265,7 @@ line level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    225    ----
+   CODE SIZE        =    239    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =     17    ----
    PDATA SIZE       =   ----    ----

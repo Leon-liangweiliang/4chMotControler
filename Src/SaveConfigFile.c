@@ -27,7 +27,8 @@ void ResetSaveData(void)
 	SaveLedData0.LEDMotorLocation[3]=50;
 	SaveLedData0.LEDMotorLocation[4]=75;
 	SaveLedData0.MotorStepPluses=90;
-	SaveLedData0.DriverFanOnOff=1;
+	SaveLedData0.DriverFanOnOff=1;	
+	SaveLedData0.PurpleLamp=1;
 }
 
 
