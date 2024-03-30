@@ -262,7 +262,7 @@ void Time0OutDelaySub(void)
 	
 
 	if ((LCD_DISPiD==1) && (SaveLedData0.LedOnOff==0) && (MovetoOtherLedch==1)) SelectChDelayCounter++;//×Ô¶¯
-		if(SaveLedData0.SelectedLedChanel==1&&SaveLedData0.PurpleLamp==0)
+		if(SaveLedData0.SelectedLedChanel==1&&SaveLedData0.PurpleLamp==0) 
 		{
 	  if (SelectChDelayCounter>75)  
 	  {
