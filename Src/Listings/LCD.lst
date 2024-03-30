@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 1   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE LCD
@@ -62,7 +62,7 @@ line level    source
   52   1          rs=0;
   53   1          SPI_WriteData(Data2);     
   54   1          cs=1;
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 2   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 2   
 
   55   1      }
   56          //向液晶屏写一个8位数据
@@ -126,7 +126,7 @@ line level    source
  114   1        Lcd_WriteData(0x01); 
  115   1        Lcd_WriteData(0x2C); 
  116   1        Lcd_WriteData(0x2D); 
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 3   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 3   
 
  117   1        Lcd_WriteData(0x01); 
  118   1        Lcd_WriteData(0x2C); 
@@ -190,7 +190,7 @@ line level    source
  176   1        Lcd_WriteData(0x17); 
  177   1        Lcd_WriteData(0x33); 
  178   1        Lcd_WriteData(0x2c); 
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 4   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 4   
 
  179   1        Lcd_WriteData(0x29); 
  180   1        Lcd_WriteData(0x2e); 
@@ -254,7 +254,7 @@ line level    source
  238   1      /*
  239   1      #else//竖屏模式 
  240   1        Lcd_WriteIndex(0x2a);
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 5   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 5   
 
  241   1        Lcd_WriteData(0x02);
  242   1        Lcd_WriteData(x_start+2);
@@ -318,7 +318,7 @@ line level    source
  300   2          p+=2;
  301   2          Ki--;
  302   2        } 
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 6   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 6   
 
  303   1      //  Lcd_SetRegion(0,0,LCD_W-1,LCD_H-1);//恢复显示窗口为全屏 
  304   1      }
@@ -382,7 +382,7 @@ line level    source
  362          
  363          
  364          //显示一个英文字符
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 7   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 7   
 
  365          void Display_ASCII8X16(u8 x0,u8 y0,uchar *s,u8 strglen,u16 color)
  366          {
@@ -446,7 +446,7 @@ line level    source
  424          ********************************************************************/
  425          void LCD_Fill(u16 sx,u16 sy,u16 ex,u16 ey,u16 color)
  426          {   
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 8   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 8   
 
  427   1        u16 i,j;      
  428   1        u16 width=ex-sx+1;    //得到填充的宽度
@@ -510,7 +510,7 @@ line level    source
  486           * @date       :2018-08-09 
  487           * @function   :Draw a rectangle
  488           * @parameters :x1:the bebinning x coordinate of the rectangle
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 9   
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 9   
 
  489                          y1:the bebinning y coordinate of the rectangle
  490                          x2:the ending x coordinate of the rectangle
@@ -574,7 +574,7 @@ line level    source
  548   1      
  549   1      //清除数字显示
  550   1        LCD_Fill(Rx-6,RWh,Rx+26,RWh+15,BACKGROUNDCOLOR);
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 10  
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 10  
 
  551   1      //  if (Selected) LCD_DrawRectangle(Rx-9,RWh-1,Rx+38,RWh+18,BLACK);
  552   1        
@@ -638,7 +638,7 @@ line level    source
  610   2          }
  611   1      
  612   1        if (SaveLedData0.SelectedLedChanel==1)
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 11  
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 11  
 
  613   1        {
  614   2        UpdateLCDLEDSelected(1,1);
@@ -702,7 +702,7 @@ line level    source
  672   1        LCD_DISPiD=2;
  673   1        LCD_Clear(BACKGROUNDCOLOR);
  674   1        Display_ASCII8X16(8,8,"LED Number:",11,BLACK);
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 12  
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 12  
 
  675   1        DispSettingNumber(2,SaveLedData0.LedALLChanels);
  676   1        LCD_DrawRectangle(95,7,126,25,BLACK);
@@ -766,7 +766,7 @@ line level    source
  734            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x18,0x18,0x10,
  735            0x10,0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
  736            0x00,0x00,0x00,0x00,0x00,0x08,0x08,0x08,0x0c,0x0c,0x0c,0x00,0x00,
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 13  
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 13  
 
  737            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
  738            0x00,0x00,0x00,0x00,0x00,0x6c,0x38,0x10,0x00,0x7c,0xc6,0x70,0x1c,
@@ -830,7 +830,7 @@ line level    source
  796            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x7e,0x00,0x00,0x7e,0x00,0x00,
  797            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x60,0x30,0x18,0x0c,0x06,0x0c,
  798            0x18,0x30,0x60,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x7c,0xc6,0xc6,
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 14  
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 14  
 
  799            0x0c,0x18,0x18,0x00,0x18,0x18,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
  800            0x7c,0xc6,0xc6,0xde,0xde,0xde,0xdc,0xc0,0x7c,0x00,0x00,0x00,0x00,
@@ -894,7 +894,7 @@ line level    source
  858            0x00,0x7c,0xc6,0xc6,0xc6,0xc6,0x7c,0x00,0x00,0x00,0x00,0x00,0x00,
  859            0x00,0x00,0x00,0x00,0xdc,0x66,0x66,0x66,0x7c,0x60,0x60,0xf0,0x00,
  860            0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x76,0xcc,0xcc,0xcc,0x7c,0x0c,
-C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 01:43:47 PAGE 15  
+C51 COMPILER V9.59.0.0   LCD                                                               03/30/2024 13:34:44 PAGE 15  
 
  861            0x0c,0x1e,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xdc,0x76,0x66,
  862            0x60,0x60,0xf0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

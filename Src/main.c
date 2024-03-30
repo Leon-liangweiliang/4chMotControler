@@ -262,7 +262,7 @@ void Time0OutDelaySub(void)
 	
 
 	if ((LCD_DISPiD==1) && (SaveLedData0.LedOnOff==0) && (MovetoOtherLedch==1)) SelectChDelayCounter++;//自动
-		if(SaveLedData0.SelectedLedChanel==1&&SaveLedData0.PurpleLamp==0) 
+		if(SaveLedData0.SelectedLedChanel==1&&SaveLedData0.PurpleLamp==0)
 		{
 	  if (SelectChDelayCounter>75)  
 	  {
@@ -964,8 +964,52 @@ void CheckButton(void)
 					UpdateSelectedLedOnOff(1); 
 					WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
 				}
-
 			}
+			 else
+			 {
+			 if (LCD_DISPiD==2)
+			   {
+				if (SaveLedData0.LedALLChanels<4) SaveLedData0.LedALLChanels++; 
+				DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+				SaveLedData0.SelectedLedChanel=1;
+			   }
+				 else if (LCD_DISPiD==3)
+			{
+				tpv=SaveLedData0.MotorStepPluses;
+				if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
+				SaveLedData0.MotorStepPluses=tpv;
+				ABEncoderACCCounter=0;
+				if (ABEncoderAAC<10) ABEncoderAAC++;
+				DispSettingNumber(LCD_DISPiD,tpv);
+				WriteDriverAddressValue(0X1d,tpv);
+			}
+			
+			else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
+			{
+				tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
+				if (tpv<254) tpv+=1; else tpv=255;
+				//if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
+				//ABEncoderACCCounter=0;
+				//if (ABEncoderAAC<10) ABEncoderAAC++;
+				SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
+				DispSettingNumber(LCD_DISPiD,tpv);
+				WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);
+				WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1); //选择LED，点亮LED
+			}
+			else if (LCD_DISPiD==8)
+			{
+				SaveLedData0.DriverFanOnOff=1;
+				DispSettingNumber(2,1);
+				WriteDriverAddressValue(0X1e,1);
+			}
+			
+			 else if (LCD_DISPiD==9)
+			{
+				SaveLedData0.PurpleLamp=1;
+				DispSettingNumber(3,1);
+				WriteDriverAddressValue(0X20,1);
+			}
+		   }
 			while (P27==0) 
 				{
 				WDTRST;
@@ -994,6 +1038,50 @@ void CheckButton(void)
 					WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
 				}
 			}
+			else 
+		{
+			if (LCD_DISPiD==2)
+			{
+				if (SaveLedData0.LedALLChanels>1) SaveLedData0.LedALLChanels--; 
+				DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+			}
+			else if (LCD_DISPiD==3)
+			{
+				tpv=SaveLedData0.MotorStepPluses;
+		
+				if (tpv>(ABEncoderAAC+1)) tpv-=ABEncoderAAC; else tpv=1;
+				SaveLedData0.MotorStepPluses=tpv;
+				ABEncoderACCCounter=0;
+				if (ABEncoderAAC<10) ABEncoderAAC++;
+				DispSettingNumber(LCD_DISPiD,tpv);
+				WriteDriverAddressValue(0X1d,tpv);  //设置LED 每步脉冲
+			}
+			else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
+			{
+				tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
+				if (tpv>0) tpv-=1; else tpv=0;
+			//	if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=0;
+			//	ABEncoderACCCounter=0;
+			//	if (ABEncoderAAC<10) ABEncoderAAC++;
+				SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
+				DispSettingNumber(LCD_DISPiD,tpv);
+				WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);//发送led 位置信息
+				WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);//发送选择的led 和 开灯		
+			}
+			else if (LCD_DISPiD==8)
+			{
+				SaveLedData0.DriverFanOnOff=0;
+				DispSettingNumber(2,0);
+				WriteDriverAddressValue(0X1e,0);
+			}
+			
+				else if (LCD_DISPiD==9)
+			{
+				SaveLedData0.PurpleLamp=0;
+				DispSettingNumber(3,0);
+				WriteDriverAddressValue(0X20,0);
+			}
+		}
 			while (P00==0) 
 				{
 				WDTRST;
@@ -1023,6 +1111,35 @@ void CheckButton(void)
 					WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
 				}
 			}
+						else if (LCD_DISPiD>=2)
+					{
+					LCD_DISPiD++; 
+					if (LCD_DISPiD==3) 
+						{
+						DispSettingRectangle();
+						WriteDriverAddressValue(0X1d,SaveLedData0.MotorStepPluses);  //设置LED 每步脉冲
+						}
+					else if (LCD_DISPiD<=7) 
+						{
+						DispSettingRectangle();
+						WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);// update led selection and on off
+						}
+					else if (LCD_DISPiD==8) //driver fan onoff
+						{
+						  DisplaySetting1();							
+						}
+						else if(LCD_DISPiD==9)
+						{
+							DisplaySetting2();
+						}
+						else 
+						{
+						LCD_DISPiD=1;
+						LCD_DrawWorkScreen();
+						NeedSaveData=1;  //需要保存
+						WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+						}
+					}
 			while (P01==0) 
 				{
 				WDTRST;

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 1   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE SPI_FLASH
@@ -62,7 +62,7 @@ line level    source
   52          /* Private variables ---------------------------------------------------------*/
   53          /* Private function prototypes -----------------------------------------------*/
   54          /* Private functions ---------------------------------------------------------*/
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 2   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 2   
 
   55          
   56          /*******************************************************************************
@@ -126,7 +126,7 @@ line level    source
  114   1        /* Send write enable instruction */
  115   1        SPI_FLASH_WriteEnable();
  116   1      
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 3   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 3   
 
  117   1        /* Bulk Erase */
  118   1        /* Select the FLASH: Chip Select low */
@@ -190,7 +190,7 @@ line level    source
  176   1        /* Deselect the FLASH: Chip Select high */
  177   1        SPI_CS=1;
  178   1      
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 4   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 4   
 
  179   1        /* Wait the end of Flash writing */
  180   1        SPI_FLASH_WaitForWriteEnd();
@@ -254,7 +254,7 @@ line level    source
  238   1        {
  239   2          if (NumOfPage == 0) /* NumByteToWrite < SPI_FLASH_PageSize */
  240   2          {
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 5   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 5   
 
  241   3            if (NumOfSingle > count) /* (NumByteToWrite + WriteAddr) > SPI_FLASH_PageSize */
  242   3            {
@@ -318,7 +318,7 @@ line level    source
  300          /*******************************************************************************
  301          * Function Name  : SPI_FLASH_BufferRead
  302          * Description    : Reads a block of data from the FLASH.
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 6   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 6   
 
  303          * Input          : - pBuffer : pointer to the buffer that receives the data read
  304          *                    from the FLASH.
@@ -382,7 +382,7 @@ line level    source
  362   1      
  363   1        /* Deselect the FLASH: Chip Select high */
  364   1        SPI_CS=1;
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 7   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 7   
 
  365   1        Temp = (Temp0 << 16) | (Temp1 << 8) | Temp2;
  366   1      
@@ -446,7 +446,7 @@ line level    source
  424   1      }
  425          
  426          /*******************************************************************************
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 8   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 8   
 
  427          * Function Name  : SPI_FLASH_ReadByte
  428          * Description    : Reads a byte from the SPI Flash.
@@ -510,7 +510,7 @@ line level    source
  486          void SPI_FLASH_WriteEnable(void)
  487          {
  488   1        /* Select the FLASH: Chip Select low */
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 9   
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 9   
 
  489   1        SPI_CS=0;
  490   1      
@@ -574,7 +574,7 @@ line level    source
  548   1        SPI_CS=0;
  549   1      
  550   1        /* Send "Power Down" instruction */
-C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 01:43:47 PAGE 10  
+C51 COMPILER V9.59.0.0   SPI_FLASH                                                         03/30/2024 13:34:44 PAGE 10  
 
  551   1        SPI_FLASH_SendByte(W25X_ReleasePowerDown);
  552   1      

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 01:43:47 PAGE 1   
+C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 13:34:44 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE STC8A_IT
@@ -62,7 +62,7 @@ line level    source
   52          
   53          
   54          
-C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 01:43:47 PAGE 2   
+C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 13:34:44 PAGE 2   
 
   55          void INT3_Isr() interrupt 11
   56          {
@@ -126,7 +126,7 @@ line level    source
  114              if (TI)
  115              {
  116                  TI = 0;                                 //清中断标志
-C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 01:43:47 PAGE 3   
+C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 13:34:44 PAGE 3   
 
  117                  uart1Memory.busy = 0;
  118              }
@@ -190,7 +190,7 @@ line level    source
  176   1        if ((uart4rcpkg.UsbCmdStatus==REC4_HEAD1) && (uart4rcpkg.RecStatus)==REC2_HEAD1)
  177   1        {
  178   2          if (rxByte==0X5A) uart4rcpkg.RecStatus=REC2_HEAD2;
-C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 01:43:47 PAGE 4   
+C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 13:34:44 PAGE 4   
 
  179   2          else if (rxByte==0x69) uart4rcpkg.UsbCmdStatus=REC4_HEAD2;
  180   2        }
@@ -254,7 +254,7 @@ line level    source
  238   4                  uart4rcpkg.pkg_num =rxByte;
  239   4                  uart4rcpkg.pkg_num=(uart4rcpkg.pkg_num<<8);
  240   4                  uart4rcpkg.RecStatus=REC2_PKG_N_L;
-C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 01:43:47 PAGE 5   
+C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 13:34:44 PAGE 5   
 
  241   4              break;
  242   4      
@@ -318,7 +318,7 @@ line level    source
  300   1          
  301   1          if (S2CON & 0x01)
  302   1          {
-C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 01:43:47 PAGE 6   
+C51 COMPILER V9.59.0.0   STC8A_IT                                                          03/30/2024 13:34:44 PAGE 6   
 
  303   2              S2CON &= ~0x01;
  304   2          uart2Memory.UartPkgTimeoutCounter=0;
