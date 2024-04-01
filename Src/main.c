@@ -580,6 +580,7 @@ void DoRsUart2Cmd(void)
 					}
 				else*/
 					{
+						if(MovetoOtherLedch!=1)						
 					WriteDriverAddressValue(0X11,SaveLedData0.SelectedLedChanel);
 					}
 				}

@@ -1,4 +1,4 @@
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 1   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 1   
 
 
 C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ line level    source
   52          u8 SelectData=0;
   53          u8 UpdateTHCounter=0;
   54          u8 RunModel=0;
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 2   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 2   
 
   55          u8 StartDelayCounter=0;
   56          u8 SaveEEpromDelaycounter=0;
@@ -126,7 +126,7 @@ line level    source
  114   1      }
  115          
  116          u8 cmpMemory(u8* ptr, u8* dec ,u8 len)
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 3   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 3   
 
  117          {
  118   1        uint8_t i;
@@ -190,7 +190,7 @@ line level    source
  176   1        ET0 = 1;                                   
  177   1        TF0 = 0;    //清除TF0标志
  178   1        TR0 = 1;    //定时器0开始计时
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 4   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 4   
 
  179   1      }
  180          
@@ -254,7 +254,7 @@ line level    source
  236   2          }
  237   1      
  238   1        if (SaveLedData0.Saveed==0 &&  ABEncoderDir==0) 
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 5   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 5   
 
  239   1          {
  240   2          if (SaveEEpromDelaycounter>=150)   //3秒
@@ -318,7 +318,7 @@ line level    source
  298   2          
  299   2        if (GetDriverBoardReturn==1) 
  300   2          {
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 6   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 6   
 
  301   3            DriverBoardNoReplyCounter=0;
  302   3            if (DriverBoardConnetStatus==0) NeedUpdateConnect=1;
@@ -382,7 +382,7 @@ line level    source
  360   1         S4BUF=addrsum;
  361   1         
  362   1      }
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 7   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 7   
 
  363          
  364          
@@ -446,7 +446,7 @@ line level    source
  422   4              WriteDriverAddressValue(0X12,SaveLedData0.LedOnOff);
  423   4              SaveLedData0.Saveed=0;
  424   4              }
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 8   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 8   
 
  425   3          }
  426   2          else if (usbWRAddr>=0x14 && usbWRAddr<=0x17)
@@ -510,7 +510,7 @@ line level    source
  484   3          }
  485   2          else if (usbWRAddr>=0x19 && usbWRAddr<=0x1c)
  486   2          {
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 9   
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 9   
 
  487   3          usbWRData=SaveLedData0.LEDMotorLocation[usbWRAddr-0x18];
  488   3          }
@@ -574,7 +574,7 @@ line level    source
  546   2        }
  547   1      }
  548          
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 10  
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 10  
 
  549          
  550          void DoRsUart2Cmd(void)
@@ -610,698 +610,699 @@ line level    source
  580   4                }
  581   4              else*/
  582   4                {
- 583   5                WriteDriverAddressValue(0X11,SaveLedData0.SelectedLedChanel);
- 584   5                }
- 585   4              }
- 586   3            }
- 587   2          }
- 588   1        else if (addrecode==0x12)
- 589   1      
- 590   1          {
- 591   2          if (SaveLedData0.LedOnOff!=uart2rcpkg.UartRunBuf[1])
- 592   2            {
- 593   3            WriteDriverAddressValue(0X12,SaveLedData0.LedOnOff);
- 594   3            }
- 595   2          }
- 596   1      }
- 597          
+ 583   5                  if(MovetoOtherLedch!=1)           
+ 584   5                WriteDriverAddressValue(0X11,SaveLedData0.SelectedLedChanel);
+ 585   5                }
+ 586   4              }
+ 587   3            }
+ 588   2          }
+ 589   1        else if (addrecode==0x12)
+ 590   1      
+ 591   1          {
+ 592   2          if (SaveLedData0.LedOnOff!=uart2rcpkg.UartRunBuf[1])
+ 593   2            {
+ 594   3            WriteDriverAddressValue(0X12,SaveLedData0.LedOnOff);
+ 595   3            }
+ 596   2          }
+ 597   1      }
  598          
- 599          u8 DoUart2Pkg(void)
- 600          {
- 601   1        u8 temp;
- 602   1        
- 603   1        if (uart2Memory.RxByteSize==0) return 0;
- 604   1      
- 605   1        temp=uart2Memory.RxBuffer[uart2Memory.ReadCounter];
- 606   1        if (uart2Memory.ReadCounter<(RxBufferSize-1)) uart2Memory.ReadCounter++; else uart2Memory.ReadCounter=0;
- 607   1        if(uart2Memory.RxByteSize>0)   uart2Memory.RxByteSize--;
- 608   1        switch (uart2rcpkg.RecStatus)
- 609   1        {
- 610   2          case REC_HEAD1:
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 11  
+ 599          
+ 600          u8 DoUart2Pkg(void)
+ 601          {
+ 602   1        u8 temp;
+ 603   1        
+ 604   1        if (uart2Memory.RxByteSize==0) return 0;
+ 605   1      
+ 606   1        temp=uart2Memory.RxBuffer[uart2Memory.ReadCounter];
+ 607   1        if (uart2Memory.ReadCounter<(RxBufferSize-1)) uart2Memory.ReadCounter++; else uart2Memory.ReadCounter=0;
+ 608   1        if(uart2Memory.RxByteSize>0)   uart2Memory.RxByteSize--;
+ 609   1        switch (uart2rcpkg.RecStatus)
+ 610   1        {
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 11  
 
- 611   2            if (temp==0X5A) uart2rcpkg.RecStatus=REC_HEAD2;
- 612   2          break;
- 613   2          case REC_HEAD2:
- 614   2            if (temp==0XA5) uart2rcpkg.RecStatus=REC_RKLEN;
- 615   2            else uart2rcpkg.RecStatus=REC_HEAD1;
- 616   2          break;
- 617   2          case REC_RKLEN:
- 618   2          if (temp>24|| temp<1) 
- 619   2              uart2rcpkg.RecStatus=REC_HEAD1;
- 620   2            else 
- 621   2              {
- 622   3              uart2rcpkg.pklen=(uint8_t)(temp-1);
- 623   3              uart2rcpkg.RecStatus=REC_CMD;
- 624   3              }
- 625   2          break;
- 626   2          case REC_CMD:
- 627   2            if (temp!=0x82)
- 628   2              uart2rcpkg.RecStatus=REC_HEAD1;
- 629   2            else 
- 630   2              {
- 631   3              uart2rcpkg.cmd=temp;
- 632   3              uart2rcpkg.bufwpoint=0;
- 633   3              uart2rcpkg.RecStatus=REC_DATA;
- 634   3              }
- 635   2            
- 636   2          break;
- 637   2          case REC_DATA:
- 638   2            uart2rcpkg.UartRunBuf[uart2rcpkg.bufwpoint]=temp;
- 639   2            uart2rcpkg.bufwpoint++;
- 640   2            if (uart2rcpkg.bufwpoint>=uart2rcpkg.pklen)
- 641   2              {
- 642   3                DoRsUart2Cmd();
- 643   3                uart2rcpkg.RecStatus=REC_HEAD1;
- 644   3                return 1;
- 645   3              }
- 646   2          break;
- 647   2          
- 648   2        }
- 649   1        return 2;
- 650   1      }
- 651          
- 652          void CheckButton(void)
- 653          {
- 654   1        u8 tpv;
- 655   1        u16 timout=0;
- 656   1        u8 n1=0,n2=0;
- 657   1        if (GetDriverBoardReturn==0) return;
- 658   1      
- 659   1        if (ABEncoderDir==1)
- 660   1        {
- 661   2          ABEncoderDir=0;
- 662   2          if (LCD_DISPiD==1)
- 663   2          {
- 664   3            if (SaveLedData0.LedOnOff==1)
- 665   3            {
- 666   4              tpv=SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel];
- 667   4              if (tpv<(100-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=100;
- 668   4              ABEncoderACCCounter=0;
- 669   4              if (ABEncoderAAC<10) ABEncoderAAC++;
- 670   4              SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel]=tpv;
- 671   4              SaveLedData0.Saveed=0;
- 672   4              UpdateLcdPowerDisplay(SaveLedData0.SelectedLedChanel,tpv,1);
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 12  
+ 611   2          case REC_HEAD1:
+ 612   2            if (temp==0X5A) uart2rcpkg.RecStatus=REC_HEAD2;
+ 613   2          break;
+ 614   2          case REC_HEAD2:
+ 615   2            if (temp==0XA5) uart2rcpkg.RecStatus=REC_RKLEN;
+ 616   2            else uart2rcpkg.RecStatus=REC_HEAD1;
+ 617   2          break;
+ 618   2          case REC_RKLEN:
+ 619   2          if (temp>24|| temp<1) 
+ 620   2              uart2rcpkg.RecStatus=REC_HEAD1;
+ 621   2            else 
+ 622   2              {
+ 623   3              uart2rcpkg.pklen=(uint8_t)(temp-1);
+ 624   3              uart2rcpkg.RecStatus=REC_CMD;
+ 625   3              }
+ 626   2          break;
+ 627   2          case REC_CMD:
+ 628   2            if (temp!=0x82)
+ 629   2              uart2rcpkg.RecStatus=REC_HEAD1;
+ 630   2            else 
+ 631   2              {
+ 632   3              uart2rcpkg.cmd=temp;
+ 633   3              uart2rcpkg.bufwpoint=0;
+ 634   3              uart2rcpkg.RecStatus=REC_DATA;
+ 635   3              }
+ 636   2            
+ 637   2          break;
+ 638   2          case REC_DATA:
+ 639   2            uart2rcpkg.UartRunBuf[uart2rcpkg.bufwpoint]=temp;
+ 640   2            uart2rcpkg.bufwpoint++;
+ 641   2            if (uart2rcpkg.bufwpoint>=uart2rcpkg.pklen)
+ 642   2              {
+ 643   3                DoRsUart2Cmd();
+ 644   3                uart2rcpkg.RecStatus=REC_HEAD1;
+ 645   3                return 1;
+ 646   3              }
+ 647   2          break;
+ 648   2          
+ 649   2        }
+ 650   1        return 2;
+ 651   1      }
+ 652          
+ 653          void CheckButton(void)
+ 654          {
+ 655   1        u8 tpv;
+ 656   1        u16 timout=0;
+ 657   1        u8 n1=0,n2=0;
+ 658   1        if (GetDriverBoardReturn==0) return;
+ 659   1      
+ 660   1        if (ABEncoderDir==1)
+ 661   1        {
+ 662   2          ABEncoderDir=0;
+ 663   2          if (LCD_DISPiD==1)
+ 664   2          {
+ 665   3            if (SaveLedData0.LedOnOff==1)
+ 666   3            {
+ 667   4              tpv=SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel];
+ 668   4              if (tpv<(100-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=100;
+ 669   4              ABEncoderACCCounter=0;
+ 670   4              if (ABEncoderAAC<10) ABEncoderAAC++;
+ 671   4              SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel]=tpv;
+ 672   4              SaveLedData0.Saveed=0;
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 12  
 
- 673   4              WriteDriverAddressValue(0x13+SaveLedData0.SelectedLedChanel,tpv);
- 674   4            }
- 675   3            else 
- 676   3            { 
- 677   4              SelectChDelayCounter=0;
- 678   4              tpv=SaveLedData0.SelectedLedChanel;
- 679   4              UpdateLCDLEDSelected(tpv,0);
- 680   4              if (tpv<(SaveLedData0.LedALLChanels)) tpv++; else tpv=1;
- 681   4              SaveLedData0.SelectedLedChanel=tpv;
- 682   4              UpdateLCDLEDSelected(tpv,1);
- 683   4              MovetoOtherLedch=1;
- 684   4            }
- 685   3          }
- 686   2          else 
- 687   2          {
- 688   3            if (LCD_DISPiD==2)
- 689   3            {
- 690   4              if (SaveLedData0.LedALLChanels<4) SaveLedData0.LedALLChanels++; 
- 691   4              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
- 692   4              SaveLedData0.SelectedLedChanel=1;
- 693   4            }
- 694   3            else if (LCD_DISPiD==3)
- 695   3            {
- 696   4              tpv=SaveLedData0.MotorStepPluses;
- 697   4              if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
- 698   4              SaveLedData0.MotorStepPluses=tpv;
- 699   4              ABEncoderACCCounter=0;
- 700   4              if (ABEncoderAAC<10) ABEncoderAAC++;
- 701   4              DispSettingNumber(LCD_DISPiD,tpv);
- 702   4              WriteDriverAddressValue(0X1d,tpv);
- 703   4            }
- 704   3            
- 705   3            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
- 706   3            {
- 707   4              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
- 708   4              if (tpv<254) tpv+=1; else tpv=255;
- 709   4              //if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
- 710   4              //ABEncoderACCCounter=0;
- 711   4              //if (ABEncoderAAC<10) ABEncoderAAC++;
- 712   4              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
- 713   4              DispSettingNumber(LCD_DISPiD,tpv);
- 714   4              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);
- 715   4              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1); //选择LED，点亮LED
- 716   4            }
- 717   3            else if (LCD_DISPiD==8)
- 718   3            {
- 719   4              SaveLedData0.DriverFanOnOff=1;
- 720   4              DispSettingNumber(2,1);
- 721   4              WriteDriverAddressValue(0X1e,1);
- 722   4            }
- 723   3            
- 724   3             else if (LCD_DISPiD==9)
- 725   3            {
- 726   4              SaveLedData0.PurpleLamp=1;
- 727   4              DispSettingNumber(3,1);
- 728   4              WriteDriverAddressValue(0X20,1);
- 729   4            }
- 730   3            
- 731   3          }
- 732   2      
- 733   2        }
- 734   1        
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 13  
+ 673   4              UpdateLcdPowerDisplay(SaveLedData0.SelectedLedChanel,tpv,1);
+ 674   4              WriteDriverAddressValue(0x13+SaveLedData0.SelectedLedChanel,tpv);
+ 675   4            }
+ 676   3            else 
+ 677   3            { 
+ 678   4              SelectChDelayCounter=0;
+ 679   4              tpv=SaveLedData0.SelectedLedChanel;
+ 680   4              UpdateLCDLEDSelected(tpv,0);
+ 681   4              if (tpv<(SaveLedData0.LedALLChanels)) tpv++; else tpv=1;
+ 682   4              SaveLedData0.SelectedLedChanel=tpv;
+ 683   4              UpdateLCDLEDSelected(tpv,1);
+ 684   4              MovetoOtherLedch=1;
+ 685   4            }
+ 686   3          }
+ 687   2          else 
+ 688   2          {
+ 689   3            if (LCD_DISPiD==2)
+ 690   3            {
+ 691   4              if (SaveLedData0.LedALLChanels<4) SaveLedData0.LedALLChanels++; 
+ 692   4              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+ 693   4              SaveLedData0.SelectedLedChanel=1;
+ 694   4            }
+ 695   3            else if (LCD_DISPiD==3)
+ 696   3            {
+ 697   4              tpv=SaveLedData0.MotorStepPluses;
+ 698   4              if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
+ 699   4              SaveLedData0.MotorStepPluses=tpv;
+ 700   4              ABEncoderACCCounter=0;
+ 701   4              if (ABEncoderAAC<10) ABEncoderAAC++;
+ 702   4              DispSettingNumber(LCD_DISPiD,tpv);
+ 703   4              WriteDriverAddressValue(0X1d,tpv);
+ 704   4            }
+ 705   3            
+ 706   3            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
+ 707   3            {
+ 708   4              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
+ 709   4              if (tpv<254) tpv+=1; else tpv=255;
+ 710   4              //if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
+ 711   4              //ABEncoderACCCounter=0;
+ 712   4              //if (ABEncoderAAC<10) ABEncoderAAC++;
+ 713   4              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
+ 714   4              DispSettingNumber(LCD_DISPiD,tpv);
+ 715   4              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);
+ 716   4              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1); //选择LED，点亮LED
+ 717   4            }
+ 718   3            else if (LCD_DISPiD==8)
+ 719   3            {
+ 720   4              SaveLedData0.DriverFanOnOff=1;
+ 721   4              DispSettingNumber(2,1);
+ 722   4              WriteDriverAddressValue(0X1e,1);
+ 723   4            }
+ 724   3            
+ 725   3             else if (LCD_DISPiD==9)
+ 726   3            {
+ 727   4              SaveLedData0.PurpleLamp=1;
+ 728   4              DispSettingNumber(3,1);
+ 729   4              WriteDriverAddressValue(0X20,1);
+ 730   4            }
+ 731   3            
+ 732   3          }
+ 733   2      
+ 734   2        }
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 13  
 
- 735   1        else if (ABEncoderDir==0xff)
- 736   1        {
- 737   2          ABEncoderDir=0;
- 738   2          if (LCD_DISPiD==1)
- 739   2          {
- 740   3            
- 741   3            if (SaveLedData0.LedOnOff==1)
- 742   3            {
- 743   4              tpv=SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel];
- 744   4              if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=1;
- 745   4              ABEncoderACCCounter=0;
- 746   4              if (ABEncoderAAC<10) ABEncoderAAC++;
- 747   4              SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel]=tpv;
- 748   4              SaveLedData0.Saveed=0;
- 749   4              UpdateLcdPowerDisplay(SaveLedData0.SelectedLedChanel,tpv,1);
- 750   4              WriteDriverAddressValue(0x13+SaveLedData0.SelectedLedChanel,tpv);
- 751   4            }
- 752   3            else 
- 753   3            {
- 754   4              SelectChDelayCounter=0;
- 755   4              tpv=SaveLedData0.SelectedLedChanel;
- 756   4              UpdateLCDLEDSelected(tpv,0);
- 757   4              if (tpv>1) tpv--; else tpv=SaveLedData0.LedALLChanels;
- 758   4              SaveLedData0.SelectedLedChanel=tpv;
- 759   4              UpdateLCDLEDSelected(tpv,1);
- 760   4              MovetoOtherLedch=1;
- 761   4            }
- 762   3          }
- 763   2          else 
- 764   2          {
- 765   3            if (LCD_DISPiD==2)
- 766   3            {
- 767   4              if (SaveLedData0.LedALLChanels>1) SaveLedData0.LedALLChanels--; 
- 768   4              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
- 769   4            }
- 770   3            else if (LCD_DISPiD==3)
- 771   3            {
- 772   4              tpv=SaveLedData0.MotorStepPluses;
- 773   4          
- 774   4              if (tpv>(ABEncoderAAC+1)) tpv-=ABEncoderAAC; else tpv=1;
- 775   4              SaveLedData0.MotorStepPluses=tpv;
- 776   4              ABEncoderACCCounter=0;
- 777   4              if (ABEncoderAAC<10) ABEncoderAAC++;
- 778   4              DispSettingNumber(LCD_DISPiD,tpv);
- 779   4              WriteDriverAddressValue(0X1d,tpv);  //设置LED 每步脉冲
- 780   4            }
- 781   3            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
- 782   3            {
- 783   4              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
- 784   4              if (tpv>0) tpv-=1; else tpv=0;
- 785   4            //  if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=0;
- 786   4            //  ABEncoderACCCounter=0;
- 787   4            //  if (ABEncoderAAC<10) ABEncoderAAC++;
- 788   4              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
- 789   4              DispSettingNumber(LCD_DISPiD,tpv);
- 790   4              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);//发送led 位置信息
- 791   4              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);//发送选择的led 和 开灯
- 792   4          
- 793   4            }
- 794   3            else if (LCD_DISPiD==8)
- 795   3            {
- 796   4              SaveLedData0.DriverFanOnOff=0;
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 14  
+ 735   1        
+ 736   1        else if (ABEncoderDir==0xff)
+ 737   1        {
+ 738   2          ABEncoderDir=0;
+ 739   2          if (LCD_DISPiD==1)
+ 740   2          {
+ 741   3            
+ 742   3            if (SaveLedData0.LedOnOff==1)
+ 743   3            {
+ 744   4              tpv=SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel];
+ 745   4              if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=1;
+ 746   4              ABEncoderACCCounter=0;
+ 747   4              if (ABEncoderAAC<10) ABEncoderAAC++;
+ 748   4              SaveLedData0.LedPower[SaveLedData0.SelectedLedChanel]=tpv;
+ 749   4              SaveLedData0.Saveed=0;
+ 750   4              UpdateLcdPowerDisplay(SaveLedData0.SelectedLedChanel,tpv,1);
+ 751   4              WriteDriverAddressValue(0x13+SaveLedData0.SelectedLedChanel,tpv);
+ 752   4            }
+ 753   3            else 
+ 754   3            {
+ 755   4              SelectChDelayCounter=0;
+ 756   4              tpv=SaveLedData0.SelectedLedChanel;
+ 757   4              UpdateLCDLEDSelected(tpv,0);
+ 758   4              if (tpv>1) tpv--; else tpv=SaveLedData0.LedALLChanels;
+ 759   4              SaveLedData0.SelectedLedChanel=tpv;
+ 760   4              UpdateLCDLEDSelected(tpv,1);
+ 761   4              MovetoOtherLedch=1;
+ 762   4            }
+ 763   3          }
+ 764   2          else 
+ 765   2          {
+ 766   3            if (LCD_DISPiD==2)
+ 767   3            {
+ 768   4              if (SaveLedData0.LedALLChanels>1) SaveLedData0.LedALLChanels--; 
+ 769   4              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+ 770   4            }
+ 771   3            else if (LCD_DISPiD==3)
+ 772   3            {
+ 773   4              tpv=SaveLedData0.MotorStepPluses;
+ 774   4          
+ 775   4              if (tpv>(ABEncoderAAC+1)) tpv-=ABEncoderAAC; else tpv=1;
+ 776   4              SaveLedData0.MotorStepPluses=tpv;
+ 777   4              ABEncoderACCCounter=0;
+ 778   4              if (ABEncoderAAC<10) ABEncoderAAC++;
+ 779   4              DispSettingNumber(LCD_DISPiD,tpv);
+ 780   4              WriteDriverAddressValue(0X1d,tpv);  //设置LED 每步脉冲
+ 781   4            }
+ 782   3            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
+ 783   3            {
+ 784   4              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
+ 785   4              if (tpv>0) tpv-=1; else tpv=0;
+ 786   4            //  if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=0;
+ 787   4            //  ABEncoderACCCounter=0;
+ 788   4            //  if (ABEncoderAAC<10) ABEncoderAAC++;
+ 789   4              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
+ 790   4              DispSettingNumber(LCD_DISPiD,tpv);
+ 791   4              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);//发送led 位置信息
+ 792   4              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);//发送选择的led 和 开灯
+ 793   4          
+ 794   4            }
+ 795   3            else if (LCD_DISPiD==8)
+ 796   3            {
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 14  
 
- 797   4              DispSettingNumber(2,0);
- 798   4              WriteDriverAddressValue(0X1e,0);
- 799   4            }
- 800   3            
- 801   3              else if (LCD_DISPiD==9)
- 802   3            {
- 803   4              SaveLedData0.PurpleLamp=0;
- 804   4              DispSettingNumber(3,0);
- 805   4              WriteDriverAddressValue(0X20,0);
- 806   4            }
- 807   3            
- 808   3          }
- 809   2        }
- 810   1      
- 811   1        if (P32==0)//编码器按键
- 812   1          {
- 813   2          delay_ms(5);
- 814   2          if (P32==0)
- 815   2          {
- 816   3          /*
- 817   3            for (tpv=0;tpv<100;tpv++)
- 818   3              {
- 819   3              delay_ms(30);
- 820   3              if (P32==1) break;
- 821   3              }
- 822   3            if(P32==0)
- 823   3              {
- 824   3              DisplaySetting();
- 825   3              Beep();  //进入设置界面
- 826   3              }
- 827   3            else*/
- 828   3              {
- 829   4              Beep();
- 830   4              if (LCD_DISPiD==1)// && GetDriverBoardReturn==1)
- 831   4                {
- 832   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
- 833   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
- 834   5                }
- 835   4              else if (LCD_DISPiD>=2)
- 836   4                {
- 837   5                LCD_DISPiD++; 
- 838   5                if (LCD_DISPiD==3) 
- 839   5                  {
- 840   6                  DispSettingRectangle();
- 841   6                  WriteDriverAddressValue(0X1d,SaveLedData0.MotorStepPluses);  //设置LED 每步脉冲
- 842   6                  }
- 843   5                else if (LCD_DISPiD<=7) 
- 844   5                  {
- 845   6                  DispSettingRectangle();
- 846   6                  WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);// update led selection and on off
- 847   6                  }
- 848   5                else if (LCD_DISPiD==8) //driver fan onoff
- 849   5                  {
- 850   6                    DisplaySetting1();              
- 851   6                  }
- 852   5                  else if(LCD_DISPiD==9)
- 853   5                  {
- 854   6                    DisplaySetting2();
- 855   6                  }
- 856   5                else 
- 857   5                  {
- 858   6                  LCD_DISPiD=1;
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 15  
+ 797   4              SaveLedData0.DriverFanOnOff=0;
+ 798   4              DispSettingNumber(2,0);
+ 799   4              WriteDriverAddressValue(0X1e,0);
+ 800   4            }
+ 801   3            
+ 802   3              else if (LCD_DISPiD==9)
+ 803   3            {
+ 804   4              SaveLedData0.PurpleLamp=0;
+ 805   4              DispSettingNumber(3,0);
+ 806   4              WriteDriverAddressValue(0X20,0);
+ 807   4            }
+ 808   3            
+ 809   3          }
+ 810   2        }
+ 811   1      
+ 812   1        if (P32==0)//编码器按键
+ 813   1          {
+ 814   2          delay_ms(5);
+ 815   2          if (P32==0)
+ 816   2          {
+ 817   3          /*
+ 818   3            for (tpv=0;tpv<100;tpv++)
+ 819   3              {
+ 820   3              delay_ms(30);
+ 821   3              if (P32==1) break;
+ 822   3              }
+ 823   3            if(P32==0)
+ 824   3              {
+ 825   3              DisplaySetting();
+ 826   3              Beep();  //进入设置界面
+ 827   3              }
+ 828   3            else*/
+ 829   3              {
+ 830   4              Beep();
+ 831   4              if (LCD_DISPiD==1)// && GetDriverBoardReturn==1)
+ 832   4                {
+ 833   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
+ 834   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+ 835   5                }
+ 836   4              else if (LCD_DISPiD>=2)
+ 837   4                {
+ 838   5                LCD_DISPiD++; 
+ 839   5                if (LCD_DISPiD==3) 
+ 840   5                  {
+ 841   6                  DispSettingRectangle();
+ 842   6                  WriteDriverAddressValue(0X1d,SaveLedData0.MotorStepPluses);  //设置LED 每步脉冲
+ 843   6                  }
+ 844   5                else if (LCD_DISPiD<=7) 
+ 845   5                  {
+ 846   6                  DispSettingRectangle();
+ 847   6                  WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);// update led selection and on off
+ 848   6                  }
+ 849   5                else if (LCD_DISPiD==8) //driver fan onoff
+ 850   5                  {
+ 851   6                    DisplaySetting1();              
+ 852   6                  }
+ 853   5                  else if(LCD_DISPiD==9)
+ 854   5                  {
+ 855   6                    DisplaySetting2();
+ 856   6                  }
+ 857   5                else 
+ 858   5                  {
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 15  
 
- 859   6                  LCD_DrawWorkScreen();
- 860   6                  NeedSaveData=1;  //需要保存
- 861   6                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
- 862   6                  }
- 863   5                
- 864   5                }
- 865   4              }
- 866   3      
- 867   3            while (P32==0) 
- 868   3              {
- 869   4              WDTRST;
- 870   4              while (P32==0)  delay_ms(5);
- 871   4              }
- 872   3          }
- 873   2        }
- 874   1      
+ 859   6                  LCD_DISPiD=1;
+ 860   6                  LCD_DrawWorkScreen();
+ 861   6                  NeedSaveData=1;  //需要保存
+ 862   6                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+ 863   6                  }
+ 864   5                
+ 865   5                }
+ 866   4              }
+ 867   3      
+ 868   3            while (P32==0) 
+ 869   3              {
+ 870   4              WDTRST;
+ 871   4              while (P32==0)  delay_ms(5);
+ 872   4              }
+ 873   3          }
+ 874   2        }
  875   1      
- 876   1      /*
- 877   1        
- 878   1        if (ABEncoderDir==1)
- 879   1        {
- 880   1          ABEncoderDir=2;
- 881   1          
- 882   1        }
- 883   1        else if (ABEncoderDir==0xff)
- 884   1        {
- 885   1          ABEncoderDir=2;
- 886   1          
- 887   1        }
- 888   1         */
- 889   1      
- 890   1      //   ABEncoderStep=;
- 891   1         if ((P3&0X88)==0x88) ABEncoderDir=0;
- 892   1      
+ 876   1      
+ 877   1      /*
+ 878   1        
+ 879   1        if (ABEncoderDir==1)
+ 880   1        {
+ 881   1          ABEncoderDir=2;
+ 882   1          
+ 883   1        }
+ 884   1        else if (ABEncoderDir==0xff)
+ 885   1        {
+ 886   1          ABEncoderDir=2;
+ 887   1          
+ 888   1        }
+ 889   1         */
+ 890   1      
+ 891   1      //   ABEncoderStep=;
+ 892   1         if ((P3&0X88)==0x88) ABEncoderDir=0;
  893   1      
- 894   1        
- 895   1      
- 896   1        if (P26==0)
- 897   1        {
- 898   2          delay_ms(5);
- 899   2          if (P26==0)
- 900   2          {
- 901   3            Beep();
- 902   3              if (LCD_DISPiD==1)
- 903   3               {
- 904   4                if (SaveLedData0.SelectedLedChanel==1)
- 905   4                {
- 906   5                  if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
- 907   5                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
- 908   5                }
- 909   4                else
- 910   4                {
- 911   5                  UpdateSelcetedLed(1);
- 912   5                  UpdateSelectedLedOnOff(1); 
- 913   5                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
- 914   5                }
- 915   4               }
- 916   3            
- 917   3              while (P26==0) 
- 918   3              {
- 919   4              WDTRST;
- 920   4              while (P26==0)  
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 16  
+ 894   1      
+ 895   1        
+ 896   1      
+ 897   1        if (P26==0)
+ 898   1        {
+ 899   2          delay_ms(5);
+ 900   2          if (P26==0)
+ 901   2          {
+ 902   3            Beep();
+ 903   3              if (LCD_DISPiD==1)
+ 904   3               {
+ 905   4                if (SaveLedData0.SelectedLedChanel==1)
+ 906   4                {
+ 907   5                  if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
+ 908   5                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+ 909   5                }
+ 910   4                else
+ 911   4                {
+ 912   5                  UpdateSelcetedLed(1);
+ 913   5                  UpdateSelectedLedOnOff(1); 
+ 914   5                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
+ 915   5                }
+ 916   4               }
+ 917   3            
+ 918   3              while (P26==0) 
+ 919   3              {
+ 920   4              WDTRST;
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 16  
 
- 921   4                {
- 922   5                
- 923   5                if (P01==0)
- 924   5                  {
- 925   6                  for (tpv=0;tpv<100;tpv++)
- 926   6                  {
- 927   7                    delay_ms(30);
- 928   7                    if (P26!=0 || P01!=0) break;
- 929   7                    }
- 930   6                    if (P26==0 && P01==0)
- 931   6                      {
- 932   7                      DisplaySetting();
- 933   7                      Beep();  //进入设置界面
- 934   7                      }
- 935   6                    while (P26==0 || P01==0) 
- 936   6                    {
- 937   7                    WDTRST;
- 938   7                    while (P26==0 || P01==0)  delay_ms(5);
- 939   7                  }
- 940   6                  }
- 941   5                else 
- 942   5                  delay_ms(5);
- 943   5                }
- 944   4              }
- 945   3            }
- 946   2        }
- 947   1        
- 948   1        if (P27==0)
- 949   1        {
- 950   2          delay_ms(5);
- 951   2          if (P27==0)
- 952   2          {
- 953   3            Beep();
- 954   3            if (LCD_DISPiD==1)
- 955   3             {
- 956   4              if (SaveLedData0.SelectedLedChanel==2)
- 957   4              {
- 958   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
- 959   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
- 960   5              }
- 961   4              else  if (SaveLedData0.LedALLChanels>1)
- 962   4              {
- 963   5                UpdateSelcetedLed(2);
- 964   5                UpdateSelectedLedOnOff(1); 
- 965   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
- 966   5              }
- 967   4            }
- 968   3             else
- 969   3             {
- 970   4             if (LCD_DISPiD==2)
- 971   4               {
- 972   5              if (SaveLedData0.LedALLChanels<4) SaveLedData0.LedALLChanels++; 
- 973   5              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
- 974   5              SaveLedData0.SelectedLedChanel=1;
- 975   5               }
- 976   4               else if (LCD_DISPiD==3)
- 977   4            {
- 978   5              tpv=SaveLedData0.MotorStepPluses;
- 979   5              if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
- 980   5              SaveLedData0.MotorStepPluses=tpv;
- 981   5              ABEncoderACCCounter=0;
- 982   5              if (ABEncoderAAC<10) ABEncoderAAC++;
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 17  
+ 921   4              while (P26==0)  
+ 922   4                {
+ 923   5                
+ 924   5                if (P01==0)
+ 925   5                  {
+ 926   6                  for (tpv=0;tpv<100;tpv++)
+ 927   6                  {
+ 928   7                    delay_ms(30);
+ 929   7                    if (P26!=0 || P01!=0) break;
+ 930   7                    }
+ 931   6                    if (P26==0 && P01==0)
+ 932   6                      {
+ 933   7                      DisplaySetting();
+ 934   7                      Beep();  //进入设置界面
+ 935   7                      }
+ 936   6                    while (P26==0 || P01==0) 
+ 937   6                    {
+ 938   7                    WDTRST;
+ 939   7                    while (P26==0 || P01==0)  delay_ms(5);
+ 940   7                  }
+ 941   6                  }
+ 942   5                else 
+ 943   5                  delay_ms(5);
+ 944   5                }
+ 945   4              }
+ 946   3            }
+ 947   2        }
+ 948   1        
+ 949   1        if (P27==0)
+ 950   1        {
+ 951   2          delay_ms(5);
+ 952   2          if (P27==0)
+ 953   2          {
+ 954   3            Beep();
+ 955   3            if (LCD_DISPiD==1)
+ 956   3             {
+ 957   4              if (SaveLedData0.SelectedLedChanel==2)
+ 958   4              {
+ 959   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
+ 960   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+ 961   5              }
+ 962   4              else  if (SaveLedData0.LedALLChanels>1)
+ 963   4              {
+ 964   5                UpdateSelcetedLed(2);
+ 965   5                UpdateSelectedLedOnOff(1); 
+ 966   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
+ 967   5              }
+ 968   4            }
+ 969   3             else
+ 970   3             {
+ 971   4             if (LCD_DISPiD==2)
+ 972   4               {
+ 973   5              if (SaveLedData0.LedALLChanels<4) SaveLedData0.LedALLChanels++; 
+ 974   5              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+ 975   5              SaveLedData0.SelectedLedChanel=1;
+ 976   5               }
+ 977   4               else if (LCD_DISPiD==3)
+ 978   4            {
+ 979   5              tpv=SaveLedData0.MotorStepPluses;
+ 980   5              if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
+ 981   5              SaveLedData0.MotorStepPluses=tpv;
+ 982   5              ABEncoderACCCounter=0;
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 17  
 
- 983   5              DispSettingNumber(LCD_DISPiD,tpv);
- 984   5              WriteDriverAddressValue(0X1d,tpv);
- 985   5            }
- 986   4            
- 987   4            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
- 988   4            {
- 989   5              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
- 990   5              if (tpv<254) tpv+=1; else tpv=255;
- 991   5              //if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
- 992   5              //ABEncoderACCCounter=0;
- 993   5              //if (ABEncoderAAC<10) ABEncoderAAC++;
- 994   5              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
- 995   5              DispSettingNumber(LCD_DISPiD,tpv);
- 996   5              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);
- 997   5              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1); //选择LED，点亮LED
- 998   5            }
- 999   4            else if (LCD_DISPiD==8)
-1000   4            {
-1001   5              SaveLedData0.DriverFanOnOff=1;
-1002   5              DispSettingNumber(2,1);
-1003   5              WriteDriverAddressValue(0X1e,1);
-1004   5            }
-1005   4            
-1006   4             else if (LCD_DISPiD==9)
-1007   4            {
-1008   5              SaveLedData0.PurpleLamp=1;
-1009   5              DispSettingNumber(3,1);
-1010   5              WriteDriverAddressValue(0X20,1);
-1011   5            }
-1012   4             }
-1013   3            while (P27==0) 
-1014   3              {
-1015   4              WDTRST;
-1016   4              while (P27==0)  delay_ms(5);
-1017   4              }
-1018   3          }
-1019   2        }
-1020   1      
-1021   1        if (P00==0)
-1022   1        {
-1023   2          delay_ms(5);
-1024   2          if (P00==0)
-1025   2          {
-1026   3            Beep();
-1027   3            if (LCD_DISPiD==1)
-1028   3            {
-1029   4              if (SaveLedData0.SelectedLedChanel==3)
-1030   4              {
-1031   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
-1032   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
-1033   5              }
-1034   4              else if (SaveLedData0.LedALLChanels>2)
-1035   4              {
-1036   5                UpdateSelcetedLed(3);
-1037   5                UpdateSelectedLedOnOff(1); 
-1038   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
-1039   5              }
-1040   4            }
-1041   3            else 
-1042   3          {
-1043   4            if (LCD_DISPiD==2)
-1044   4            {
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 18  
+ 983   5              if (ABEncoderAAC<10) ABEncoderAAC++;
+ 984   5              DispSettingNumber(LCD_DISPiD,tpv);
+ 985   5              WriteDriverAddressValue(0X1d,tpv);
+ 986   5            }
+ 987   4            
+ 988   4            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
+ 989   4            {
+ 990   5              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
+ 991   5              if (tpv<254) tpv+=1; else tpv=255;
+ 992   5              //if (tpv<(255-ABEncoderAAC)) tpv+=ABEncoderAAC; else tpv=255;
+ 993   5              //ABEncoderACCCounter=0;
+ 994   5              //if (ABEncoderAAC<10) ABEncoderAAC++;
+ 995   5              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
+ 996   5              DispSettingNumber(LCD_DISPiD,tpv);
+ 997   5              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);
+ 998   5              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1); //选择LED，点亮LED
+ 999   5            }
+1000   4            else if (LCD_DISPiD==8)
+1001   4            {
+1002   5              SaveLedData0.DriverFanOnOff=1;
+1003   5              DispSettingNumber(2,1);
+1004   5              WriteDriverAddressValue(0X1e,1);
+1005   5            }
+1006   4            
+1007   4             else if (LCD_DISPiD==9)
+1008   4            {
+1009   5              SaveLedData0.PurpleLamp=1;
+1010   5              DispSettingNumber(3,1);
+1011   5              WriteDriverAddressValue(0X20,1);
+1012   5            }
+1013   4             }
+1014   3            while (P27==0) 
+1015   3              {
+1016   4              WDTRST;
+1017   4              while (P27==0)  delay_ms(5);
+1018   4              }
+1019   3          }
+1020   2        }
+1021   1      
+1022   1        if (P00==0)
+1023   1        {
+1024   2          delay_ms(5);
+1025   2          if (P00==0)
+1026   2          {
+1027   3            Beep();
+1028   3            if (LCD_DISPiD==1)
+1029   3            {
+1030   4              if (SaveLedData0.SelectedLedChanel==3)
+1031   4              {
+1032   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
+1033   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+1034   5              }
+1035   4              else if (SaveLedData0.LedALLChanels>2)
+1036   4              {
+1037   5                UpdateSelcetedLed(3);
+1038   5                UpdateSelectedLedOnOff(1); 
+1039   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
+1040   5              }
+1041   4            }
+1042   3            else 
+1043   3          {
+1044   4            if (LCD_DISPiD==2)
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 18  
 
-1045   5              if (SaveLedData0.LedALLChanels>1) SaveLedData0.LedALLChanels--; 
-1046   5              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
-1047   5            }
-1048   4            else if (LCD_DISPiD==3)
-1049   4            {
-1050   5              tpv=SaveLedData0.MotorStepPluses;
-1051   5          
-1052   5              if (tpv>(ABEncoderAAC+1)) tpv-=ABEncoderAAC; else tpv=1;
-1053   5              SaveLedData0.MotorStepPluses=tpv;
-1054   5              ABEncoderACCCounter=0;
-1055   5              if (ABEncoderAAC<10) ABEncoderAAC++;
-1056   5              DispSettingNumber(LCD_DISPiD,tpv);
-1057   5              WriteDriverAddressValue(0X1d,tpv);  //设置LED 每步脉冲
-1058   5            }
-1059   4            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
-1060   4            {
-1061   5              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
-1062   5              if (tpv>0) tpv-=1; else tpv=0;
-1063   5            //  if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=0;
-1064   5            //  ABEncoderACCCounter=0;
-1065   5            //  if (ABEncoderAAC<10) ABEncoderAAC++;
-1066   5              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
-1067   5              DispSettingNumber(LCD_DISPiD,tpv);
-1068   5              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);//发送led 位置信息
-1069   5              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);//发送选择的led 和 开灯   
-1070   5            }
-1071   4            else if (LCD_DISPiD==8)
-1072   4            {
-1073   5              SaveLedData0.DriverFanOnOff=0;
-1074   5              DispSettingNumber(2,0);
-1075   5              WriteDriverAddressValue(0X1e,0);
-1076   5            }
-1077   4            
-1078   4              else if (LCD_DISPiD==9)
-1079   4            {
-1080   5              SaveLedData0.PurpleLamp=0;
-1081   5              DispSettingNumber(3,0);
-1082   5              WriteDriverAddressValue(0X20,0);
-1083   5            }
-1084   4          }
-1085   3            while (P00==0) 
-1086   3              {
-1087   4              WDTRST;
-1088   4              while (P00==0)  delay_ms(5);
-1089   4              }
-1090   3          }
-1091   2        }
-1092   1      
-1093   1        if (P01==0)
-1094   1        {
-1095   2          delay_ms(5);
-1096   2          if (P01==0)
-1097   2          {
-1098   3            Beep();
-1099   3            
-1100   3            if (LCD_DISPiD==1)
-1101   3            {
-1102   4              if (SaveLedData0.SelectedLedChanel==4)
-1103   4              {
-1104   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
-1105   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
-1106   5              }
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 19  
+1045   4            {
+1046   5              if (SaveLedData0.LedALLChanels>1) SaveLedData0.LedALLChanels--; 
+1047   5              DispSettingNumber(LCD_DISPiD,SaveLedData0.LedALLChanels);
+1048   5            }
+1049   4            else if (LCD_DISPiD==3)
+1050   4            {
+1051   5              tpv=SaveLedData0.MotorStepPluses;
+1052   5          
+1053   5              if (tpv>(ABEncoderAAC+1)) tpv-=ABEncoderAAC; else tpv=1;
+1054   5              SaveLedData0.MotorStepPluses=tpv;
+1055   5              ABEncoderACCCounter=0;
+1056   5              if (ABEncoderAAC<10) ABEncoderAAC++;
+1057   5              DispSettingNumber(LCD_DISPiD,tpv);
+1058   5              WriteDriverAddressValue(0X1d,tpv);  //设置LED 每步脉冲
+1059   5            }
+1060   4            else if (LCD_DISPiD>3 && LCD_DISPiD<=7)
+1061   4            {
+1062   5              tpv=SaveLedData0.LEDMotorLocation[LCD_DISPiD-3];
+1063   5              if (tpv>0) tpv-=1; else tpv=0;
+1064   5            //  if (tpv>ABEncoderAAC) tpv-=ABEncoderAAC; else tpv=0;
+1065   5            //  ABEncoderACCCounter=0;
+1066   5            //  if (ABEncoderAAC<10) ABEncoderAAC++;
+1067   5              SaveLedData0.LEDMotorLocation[LCD_DISPiD-3]=tpv;
+1068   5              DispSettingNumber(LCD_DISPiD,tpv);
+1069   5              WriteDriverAddressValue(0X16+LCD_DISPiD-1,tpv);//发送led 位置信息
+1070   5              WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);//发送选择的led 和 开灯   
+1071   5            }
+1072   4            else if (LCD_DISPiD==8)
+1073   4            {
+1074   5              SaveLedData0.DriverFanOnOff=0;
+1075   5              DispSettingNumber(2,0);
+1076   5              WriteDriverAddressValue(0X1e,0);
+1077   5            }
+1078   4            
+1079   4              else if (LCD_DISPiD==9)
+1080   4            {
+1081   5              SaveLedData0.PurpleLamp=0;
+1082   5              DispSettingNumber(3,0);
+1083   5              WriteDriverAddressValue(0X20,0);
+1084   5            }
+1085   4          }
+1086   3            while (P00==0) 
+1087   3              {
+1088   4              WDTRST;
+1089   4              while (P00==0)  delay_ms(5);
+1090   4              }
+1091   3          }
+1092   2        }
+1093   1      
+1094   1        if (P01==0)
+1095   1        {
+1096   2          delay_ms(5);
+1097   2          if (P01==0)
+1098   2          {
+1099   3            Beep();
+1100   3            
+1101   3            if (LCD_DISPiD==1)
+1102   3            {
+1103   4              if (SaveLedData0.SelectedLedChanel==4)
+1104   4              {
+1105   5                if (SaveLedData0.LedOnOff)  UpdateSelectedLedOnOff(0); else UpdateSelectedLedOnOff(1); 
+1106   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 19  
 
-1107   4              else if (SaveLedData0.LedALLChanels>3)
-1108   4              {
-1109   5                UpdateSelcetedLed(4);
-1110   5                UpdateSelectedLedOnOff(1); 
-1111   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
-1112   5              }
-1113   4            }
-1114   3                  else if (LCD_DISPiD>=2)
-1115   3                {
-1116   4                LCD_DISPiD++; 
-1117   4                if (LCD_DISPiD==3) 
-1118   4                  {
-1119   5                  DispSettingRectangle();
-1120   5                  WriteDriverAddressValue(0X1d,SaveLedData0.MotorStepPluses);  //设置LED 每步脉冲
-1121   5                  }
-1122   4                else if (LCD_DISPiD<=7) 
-1123   4                  {
-1124   5                  DispSettingRectangle();
-1125   5                  WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);// update led selection and on off
-1126   5                  }
-1127   4                else if (LCD_DISPiD==8) //driver fan onoff
-1128   4                  {
-1129   5                    DisplaySetting1();              
-1130   5                  }
-1131   4                  else if(LCD_DISPiD==9)
-1132   4                  {
-1133   5                    DisplaySetting2();
-1134   5                  }
-1135   4                  else 
-1136   4                  {
-1137   5                  LCD_DISPiD=1;
-1138   5                  LCD_DrawWorkScreen();
-1139   5                  NeedSaveData=1;  //需要保存
-1140   5                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
-1141   5                  }
-1142   4                }
-1143   3            while (P01==0) 
-1144   3              {
-1145   4              WDTRST;
-1146   4              while (P01==0) 
-1147   4                {
-1148   5                if (P26==0)
-1149   5                  {
-1150   6                  for (tpv=0;tpv<100;tpv++)
-1151   6                  {
-1152   7                  delay_ms(30);
-1153   7                  if (P26!=0 || P01!=0) break;
-1154   7                  }
-1155   6                  if (P26==0 && P01==0)
-1156   6                    {
-1157   7                    DisplaySetting();
-1158   7                    Beep();  //进入设置界面
-1159   7                    }
-1160   6                  while (P26==0 || P01==0) 
-1161   6                    {
-1162   7                    WDTRST;
-1163   7                    while (P26==0 || P01==0)  delay_ms(5);
-1164   7                    }
-1165   6                  }
-1166   5                else 
-1167   5                  delay_ms(5);
-1168   5                }
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 20  
+1107   5              }
+1108   4              else if (SaveLedData0.LedALLChanels>3)
+1109   4              {
+1110   5                UpdateSelcetedLed(4);
+1111   5                UpdateSelectedLedOnOff(1); 
+1112   5                WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel, SaveLedData0.LedOnOff);
+1113   5              }
+1114   4            }
+1115   3                  else if (LCD_DISPiD>=2)
+1116   3                {
+1117   4                LCD_DISPiD++; 
+1118   4                if (LCD_DISPiD==3) 
+1119   4                  {
+1120   5                  DispSettingRectangle();
+1121   5                  WriteDriverAddressValue(0X1d,SaveLedData0.MotorStepPluses);  //设置LED 每步脉冲
+1122   5                  }
+1123   4                else if (LCD_DISPiD<=7) 
+1124   4                  {
+1125   5                  DispSettingRectangle();
+1126   5                  WriteDriverAddressValue2(0X11,LCD_DISPiD-3,1);// update led selection and on off
+1127   5                  }
+1128   4                else if (LCD_DISPiD==8) //driver fan onoff
+1129   4                  {
+1130   5                    DisplaySetting1();              
+1131   5                  }
+1132   4                  else if(LCD_DISPiD==9)
+1133   4                  {
+1134   5                    DisplaySetting2();
+1135   5                  }
+1136   4                  else 
+1137   4                  {
+1138   5                  LCD_DISPiD=1;
+1139   5                  LCD_DrawWorkScreen();
+1140   5                  NeedSaveData=1;  //需要保存
+1141   5                  WriteDriverAddressValue2(0X11,SaveLedData0.SelectedLedChanel,SaveLedData0.LedOnOff);
+1142   5                  }
+1143   4                }
+1144   3            while (P01==0) 
+1145   3              {
+1146   4              WDTRST;
+1147   4              while (P01==0) 
+1148   4                {
+1149   5                if (P26==0)
+1150   5                  {
+1151   6                  for (tpv=0;tpv<100;tpv++)
+1152   6                  {
+1153   7                  delay_ms(30);
+1154   7                  if (P26!=0 || P01!=0) break;
+1155   7                  }
+1156   6                  if (P26==0 && P01==0)
+1157   6                    {
+1158   7                    DisplaySetting();
+1159   7                    Beep();  //进入设置界面
+1160   7                    }
+1161   6                  while (P26==0 || P01==0) 
+1162   6                    {
+1163   7                    WDTRST;
+1164   7                    while (P26==0 || P01==0)  delay_ms(5);
+1165   7                    }
+1166   6                  }
+1167   5                else 
+1168   5                  delay_ms(5);
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 20  
 
-1169   4              }
-1170   3          }
-1171   2        }
-1172   1      
+1169   5                }
+1170   4              }
+1171   3          }
+1172   2        }
 1173   1      
-1174   1        if (UsbCmdUpdate!=0)
-1175   1        {
-1176   2          UsbCmdUpdate=0;
-1177   2          DoUart4CmdPro();
-1178   2        }
-1179   1      }
-1180          
-1181          void ExClockConfig(void)
-1182          {
-1183   1      // u32 timeoutcounter=0;
-1184   1        P_SW2 = 0x80;
-1185   1        XOSCCR = 0xc0;                //???ˉía2??§??
-1186   1        while (!(XOSCCR & 1) ) 
-1187   1          {
-1188   2          WDTRST;        //μè′yê±?ó?è?¨
-1189   2          }
-1190   1        CLKDIV = 0x00;                 //ê±?ó2?·??μ
-1191   1        CKSEL = 0x01;               //????ía2??§??
-1192   1        P_SW2 = 0x00;
-1193   1      }
-1194          
+1174   1      
+1175   1        if (UsbCmdUpdate!=0)
+1176   1        {
+1177   2          UsbCmdUpdate=0;
+1178   2          DoUart4CmdPro();
+1179   2        }
+1180   1      }
+1181          
+1182          void ExClockConfig(void)
+1183          {
+1184   1      // u32 timeoutcounter=0;
+1185   1        P_SW2 = 0x80;
+1186   1        XOSCCR = 0xc0;                //???ˉía2??§??
+1187   1        while (!(XOSCCR & 1) ) 
+1188   1          {
+1189   2          WDTRST;        //μè′yê±?ó?è?¨
+1190   2          }
+1191   1        CLKDIV = 0x00;                 //ê±?ó2?·??μ
+1192   1        CKSEL = 0x01;               //????ía2??§??
+1193   1        P_SW2 = 0x00;
+1194   1      }
 1195          
-1196          void main()
-1197          {
-1198   1        
-1199   1        ExClockConfig();
-1200   1        if(CmpDataFlashUuid()==0) while (1);
-1201   1        Gpio_Init();
-1202   1        Uart2Init();   //DRIVER BOARD
-1203   1        Uart4Init();  //USB
-1204   1        lcd_initial();
-1205   1        Timer0Init();
-1206   1        SPI_FLASH_Init();
-1207   1        delay_ms(100);
-1208   1        Gui_DrawFlashbmp16(0,0,0);
-1209   1      //  
-1210   1      //  Display_ASCII8X16(50,16,"EasyLWL",7,BLUE);
-1211   1        CtrlLcdBL(1);
-1212   1        EA=1;
-1213   1        ReadDriverAddressValue(0x10,1);
-1214   1        Beep();
-1215   1        ReadEEpromSaveData();
-1216   1        ReadDriverAddressValue(0x10,1);
-1217   1      
-1218   1        //开机加载画
-1219   1        while (StartDelayCounter<MAXSTARTDELAYTIME)  //等待开机停留时间, lcd 应答
-1220   1          {
-1221   2          WDTRST;  
-1222   2          if ((StartDelayCounter>=MINSTARTDELAYTIME) &&(GetDriverBoardReturn!=0)) break;
-1223   2          if (NeedUpdateLEDValue)
-1224   2          {
-1225   3          NeedUpdateLEDValue=0;
-1226   3          GetDriverBoardReturn=0;
-1227   3          ReadDriverAddressValue(0x10,1); //心跳包
-1228   3          }
-1229   2          DoUart2Pkg();  //driver board
-1230   2          }
-C51 COMPILER V9.59.0.0   MAIN                                                              03/30/2024 13:34:43 PAGE 21  
+1196          
+1197          void main()
+1198          {
+1199   1        
+1200   1        ExClockConfig();
+1201   1        if(CmpDataFlashUuid()==0) while (1);
+1202   1        Gpio_Init();
+1203   1        Uart2Init();   //DRIVER BOARD
+1204   1        Uart4Init();  //USB
+1205   1        lcd_initial();
+1206   1        Timer0Init();
+1207   1        SPI_FLASH_Init();
+1208   1        delay_ms(100);
+1209   1        Gui_DrawFlashbmp16(0,0,0);
+1210   1      //  
+1211   1      //  Display_ASCII8X16(50,16,"EasyLWL",7,BLUE);
+1212   1        CtrlLcdBL(1);
+1213   1        EA=1;
+1214   1        ReadDriverAddressValue(0x10,1);
+1215   1        Beep();
+1216   1        ReadEEpromSaveData();
+1217   1        ReadDriverAddressValue(0x10,1);
+1218   1      
+1219   1        //开机加载画
+1220   1        while (StartDelayCounter<MAXSTARTDELAYTIME)  //等待开机停留时间, lcd 应答
+1221   1          {
+1222   2          WDTRST;  
+1223   2          if ((StartDelayCounter>=MINSTARTDELAYTIME) &&(GetDriverBoardReturn!=0)) break;
+1224   2          if (NeedUpdateLEDValue)
+1225   2          {
+1226   3          NeedUpdateLEDValue=0;
+1227   3          GetDriverBoardReturn=0;
+1228   3          ReadDriverAddressValue(0x10,1); //心跳包
+1229   3          }
+1230   2          DoUart2Pkg();  //driver board
+C51 COMPILER V9.59.0.0   MAIN                                                              04/01/2024 20:57:26 PAGE 21  
 
-1231   1        
-1232   1        NeedUpdateConnect=0;
-1233   1        InitLcd();
-1234   1        WriteDriverSqAddressValue(0X10,&(SaveLedData0.DriverType),sizeof(Run_PARAMS));
-1235   1        /* Infinite loop */
-1236   1        while (1)
-1237   1        {
-1238   2          WDTRST;                      //清看门狗,否则系统复位
-1239   2          DoUart2Pkg();  //driver board
-1240   2          //DoUart4Pkg();   //usb uart4 interrupt sub run 
-1241   2        CheckButton();
-1242   2        HandleLCD();
-1243   2        }
-1244   1      }
-1245          
+1231   2          }
+1232   1        
+1233   1        NeedUpdateConnect=0;
+1234   1        InitLcd();
+1235   1        WriteDriverSqAddressValue(0X10,&(SaveLedData0.DriverType),sizeof(Run_PARAMS));
+1236   1        /* Infinite loop */
+1237   1        while (1)
+1238   1        {
+1239   2          WDTRST;                      //清看门狗,否则系统复位
+1240   2          DoUart2Pkg();  //driver board
+1241   2          //DoUart4Pkg();   //usb uart4 interrupt sub run 
+1242   2        CheckButton();
+1243   2        HandleLCD();
+1244   2        }
+1245   1      }
 1246          
 1247          
-1248          /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+1248          
+1249          /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   6996    ----
+   CODE SIZE        =   7009    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =    348    ----
    PDATA SIZE       =   ----    ----
